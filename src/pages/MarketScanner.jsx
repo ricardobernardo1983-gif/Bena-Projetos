@@ -1,0 +1,205 @@
+import React, { useState, useEffect } from 'react'
+import { Zap, TrendingUp, TrendingDown, RefreshCw, Search, Filter } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import NexusScoreBadge from '@/components/NexusScoreBadge'
+import { generateMockQuote, generateHistoricalData, B3_STOCKS } from '@/lib/mockData'
+import { calculateNexusScore } from '@/lib/nexusScore'
+import { formatPercent, getChangeColor, getChangeBg, formatVolume } from '@/lib/utils'
+import { toast } from 'sonner'
+
+const PRESETS = [
+  { label: 'Sobrevendidos RSI', desc: 'RSI < 30 — Potencial rebote', filter: (s) => s.nexusScore.technical.rsi < 35 },
+  { label: 'Golden Cross', desc: 'SMA20 cruzou acima SMA50', filter: (s) => s.nexusScore.technical.score > 70 },
+  { label: 'Alto Dividend Yield', desc: 'DY acima de 6%', filter: (s) => s.dividendYield >= 6 },
+  { label: 'P/L Barato', desc: 'P/L menor que 10', filter: (s) => s.pe && s.pe < 10 && s.pe > 0 },
+  { label: 'Maior Volume', desc: 'Volume acima da média', filter: (s) => s.volume > 5000000 },
+  { label: 'Alta de > 5% Hoje', desc: 'Maior alta do dia', filter: (s) => s.changePercent >= 5 },
+  { label: 'Queda de > 5% Hoje', desc: 'Maior queda do dia', filter: (s) => s.changePercent <= -5 },
+]
+
+export default function MarketScanner() {
+  const [allStocks, setAllStocks] = useState([])
+  const [filtered, setFiltered] = useState([])
+  const [search, setSearch] = useState('')
+  const [preset, setPreset] = useState(null)
+  const [sector, setSector] = useState('Todos')
+  const [sortBy, setSortBy] = useState('nexus')
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const sectors = ['Todos', ...new Set(B3_STOCKS.map(s => s.sector))]
+
+  useEffect(() => { loadData() }, [])
+
+  useEffect(() => { applyFilters() }, [allStocks, search, preset, sector, sortBy])
+
+  function loadData() {
+    setLoading(true)
+    const data = B3_STOCKS.map(stock => {
+      const q = generateMockQuote(stock.ticker)
+      const hist = generateHistoricalData(80, q.price)
+      const nexus = calculateNexusScore({ historicalData: hist, fundamentals: q })
+      return { ...stock, ...q, nexusScore: nexus }
+    })
+    setAllStocks(data)
+    setLoading(false)
+  }
+
+  function applyFilters() {
+    let result = [...allStocks]
+    if (search) result = result.filter(s => s.ticker.includes(search.toUpperCase()) || s.name.toLowerCase().includes(search.toLowerCase()))
+    if (sector !== 'Todos') result = result.filter(s => s.sector === sector)
+    if (preset !== null) result = result.filter(PRESETS[preset].filter)
+    result.sort((a, b) => {
+      if (sortBy === 'nexus') return b.nexusScore.score - a.nexusScore.score
+      if (sortBy === 'change') return b.changePercent - a.changePercent
+      if (sortBy === 'volume') return b.volume - a.volume
+      if (sortBy === 'price') return b.price - a.price
+      if (sortBy === 'dy') return (b.dividendYield || 0) - (a.dividendYield || 0)
+      return 0
+    })
+    setFiltered(result)
+  }
+
+  async function handleRefresh() {
+    setRefreshing(true)
+    loadData()
+    toast.success('Scanner atualizado!')
+    setRefreshing(false)
+  }
+
+  return (
+    <div className="p-6 max-w-screen-2xl mx-auto space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Zap className="w-6 h-6 text-blue-400" />
+            Scanner de Mercado
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">{filtered.length} de {allStocks.length} ações · B3</p>
+        </div>
+        <Button size="sm" variant="outline" onClick={handleRefresh} disabled={refreshing} className="border-[#1E2D42] text-slate-400">
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Atualizar
+        </Button>
+      </div>
+
+      {/* Preset filters */}
+      <div className="flex gap-2 flex-wrap">
+        {PRESETS.map((p, i) => (
+          <button
+            key={i}
+            onClick={() => setPreset(preset === i ? null : i)}
+            className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors border ${
+              preset === i ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#0D1426] text-slate-400 border-[#1E2D42] hover:border-[#2E3D52]'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Controls */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar ativo..."
+            className="w-full bg-[#0D1426] border border-[#1E2D42] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-600" />
+        </div>
+        <select value={sector} onChange={(e) => setSector(e.target.value)}
+          className="text-sm bg-[#0D1426] border border-[#1E2D42] text-slate-300 rounded-lg px-3 py-2">
+          {sectors.map(s => <option key={s}>{s}</option>)}
+        </select>
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}
+          className="text-sm bg-[#0D1426] border border-[#1E2D42] text-slate-300 rounded-lg px-3 py-2">
+          <option value="nexus">NEXUS Score</option>
+          <option value="change">Variação %</option>
+          <option value="volume">Volume</option>
+          <option value="price">Preço</option>
+          <option value="dy">Dividend Yield</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[#1E2D42] text-[11px] text-slate-500 uppercase">
+                <th className="text-left px-4 py-3">NEXUS</th>
+                <th className="text-left px-4 py-3">Ativo</th>
+                <th className="text-right px-4 py-3">Preço</th>
+                <th className="text-right px-4 py-3">Variação</th>
+                <th className="text-right px-4 py-3">Volume</th>
+                <th className="text-right px-4 py-3">P/L</th>
+                <th className="text-right px-4 py-3">DY</th>
+                <th className="text-right px-4 py-3">RSI</th>
+                <th className="text-center px-4 py-3">Sinal</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#1E2D42]/30">
+              {loading ? (
+                [...Array(10)].map((_, i) => (
+                  <tr key={i}>
+                    {[...Array(9)].map((_, j) => (
+                      <td key={j} className="px-4 py-3">
+                        <div className="h-4 rounded shimmer" />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : filtered.map((stock) => {
+                const rsi = stock.nexusScore.technical?.rsi
+                const rec = stock.nexusScore.recommendation
+                return (
+                  <tr key={stock.ticker} className="hover:bg-[#111827] transition-colors cursor-pointer">
+                    <td className="px-4 py-3">
+                      <NexusScoreBadge score={stock.nexusScore.score} size="sm" showLabel={false} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="font-bold text-white">{stock.ticker}</p>
+                      <p className="text-[10px] text-slate-500 truncate max-w-[140px]">{stock.name}</p>
+                    </td>
+                    <td className="px-4 py-3 text-right text-white tabular-nums font-semibold">
+                      R$ {stock.price?.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={`font-semibold tabular-nums ${getChangeColor(stock.changePercent)}`}>
+                        {formatPercent(stock.changePercent)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right text-slate-400 tabular-nums text-xs">
+                      {formatVolume(stock.volume)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-slate-400 tabular-nums">
+                      {stock.pe?.toFixed(1) || '—'}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={`tabular-nums ${stock.dividendYield >= 6 ? 'text-amber-400 font-semibold' : 'text-slate-400'}`}>
+                        {stock.dividendYield?.toFixed(1) || '0'}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={`tabular-nums text-xs font-semibold ${
+                        rsi < 30 ? 'text-emerald-400' : rsi > 70 ? 'text-red-400' : 'text-slate-400'
+                      }`}>
+                        {rsi?.toFixed(0) || '—'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                        rec.includes('COMPRA') ? 'signal-buy' : rec.includes('VENDA') ? 'signal-sell' : 'signal-hold'
+                      }`}>
+                        {rec}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}

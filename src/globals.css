@@ -1,0 +1,216 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* NEXUS B3 Design Tokens */
+  --nexus-bg: #070B14;
+  --nexus-surface: #0D1426;
+  --nexus-surface-2: #111827;
+  --nexus-surface-3: #1A2535;
+  --nexus-border: #1E2D42;
+  --nexus-border-2: #243348;
+
+  /* Brand Colors */
+  --nexus-blue: #2563EB;
+  --nexus-blue-light: #3B82F6;
+  --nexus-blue-glow: rgba(37, 99, 235, 0.2);
+
+  /* Status Colors */
+  --nexus-green: #10B981;
+  --nexus-green-dark: #059669;
+  --nexus-red: #EF4444;
+  --nexus-red-dark: #DC2626;
+  --nexus-amber: #F59E0B;
+  --nexus-amber-dark: #D97706;
+  --nexus-purple: #8B5CF6;
+
+  /* Text */
+  --nexus-text: #F1F5F9;
+  --nexus-text-2: #94A3B8;
+  --nexus-text-3: #475569;
+
+  /* NEXUS Score Colors */
+  --score-elite: #10B981;
+  --score-strong: #22C55E;
+  --score-good: #84CC16;
+  --score-neutral: #F59E0B;
+  --score-weak: #F97316;
+  --score-sell: #EF4444;
+
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* Shadcn tokens (dark theme B3) */
+  --background: 216 50% 5%;
+  --foreground: 210 40% 95%;
+  --card: 217 45% 8%;
+  --card-foreground: 210 40% 95%;
+  --popover: 217 45% 8%;
+  --popover-foreground: 210 40% 95%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 216 50% 5%;
+  --secondary: 217 35% 14%;
+  --secondary-foreground: 210 40% 95%;
+  --muted: 217 35% 14%;
+  --muted-foreground: 215 20% 55%;
+  --accent: 217 35% 14%;
+  --accent-foreground: 210 40% 95%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 95%;
+  --border: 217 30% 15%;
+  --input: 217 35% 14%;
+  --ring: 217 91% 60%;
+
+  --chart-1: 217 91% 60%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 43 96% 56%;
+  --chart-4: 262 83% 58%;
+  --chart-5: 0 84% 60%;
+}
+
+/* Base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--nexus-bg);
+  color: var(--nexus-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
+}
+
+/* Mono font for numbers */
+.font-mono, .tabular-nums {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--nexus-bg); }
+::-webkit-scrollbar-thumb { background: var(--nexus-border-2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--nexus-text-3); }
+
+/* Glow utilities */
+.glow-blue { box-shadow: 0 0 24px var(--nexus-blue-glow); }
+.glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); }
+.glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(13, 20, 38, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--nexus-border);
+}
+
+/* Gradient text */
+.text-gradient-blue {
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-green {
+  background: linear-gradient(135deg, #10B981, #22D3EE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Score meter */
+.score-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--nexus-border);
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s ease-out;
+}
+
+/* Ticker animation */
+.ticker-track {
+  display: flex;
+  gap: 2rem;
+  animation: ticker 60s linear infinite;
+  white-space: nowrap;
+}
+.ticker-track:hover { animation-play-state: paused; }
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Pulse dot */
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--nexus-green);
+  border-radius: 50%;
+  animation: pulse-live 2s ease-in-out infinite;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+
+/* Shimmer skeleton */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--nexus-surface) 25%,
+    var(--nexus-surface-3) 50%,
+    var(--nexus-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Card hover */
+.nexus-card {
+  background: var(--nexus-surface);
+  border: 1px solid var(--nexus-border);
+  border-radius: var(--radius);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.nexus-card:hover {
+  border-color: var(--nexus-border-2);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Buy/Sell signals */
+.signal-buy {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10B981;
+}
+.signal-sell {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+}
+.signal-hold {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #F59E0B;
+}
+
+/* Candlestick colors */
+.candle-up { fill: #10B981; stroke: #10B981; }
+.candle-down { fill: #EF4444; stroke: #EF4444; }
