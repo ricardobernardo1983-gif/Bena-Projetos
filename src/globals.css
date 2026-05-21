@@ -3,76 +3,76 @@
 @tailwind utilities;
 
 :root {
-  /* NEXUS B3 Design Tokens */
-  --nexus-bg: #070B14;
-  --nexus-surface: #0D1426;
-  --nexus-surface-2: #111827;
-  --nexus-surface-3: #1A2535;
-  --nexus-border: #1E2D42;
-  --nexus-border-2: #243348;
+  /* ═══ NEXUS B3 — TERMINAL PRO Design System ═══ */
 
-  /* Brand Colors */
-  --nexus-blue: #2563EB;
-  --nexus-blue-light: #3B82F6;
-  --nexus-blue-glow: rgba(37, 99, 235, 0.2);
+  /* Backgrounds — deep black terminal */
+  --nexus-bg: #05070D;
+  --nexus-bg-2: #070A12;
+  --nexus-surface: #0A0E18;
+  --nexus-surface-2: #0E141F;
+  --nexus-surface-3: #131B28;
+  --nexus-border: #1A2230;
+  --nexus-border-2: #232E40;
+  --nexus-border-glow: #2A3A52;
 
-  /* Status Colors */
-  --nexus-green: #10B981;
-  --nexus-green-dark: #059669;
-  --nexus-red: #EF4444;
-  --nexus-red-dark: #DC2626;
-  --nexus-amber: #F59E0B;
-  --nexus-amber-dark: #D97706;
-  --nexus-purple: #8B5CF6;
+  /* Neon Accents */
+  --nexus-cyan: #06E5D4;
+  --nexus-cyan-glow: rgba(6, 229, 212, 0.35);
+  --nexus-green: #00FF94;
+  --nexus-green-soft: #16C784;
+  --nexus-green-glow: rgba(0, 255, 148, 0.3);
+  --nexus-red: #FF3B5C;
+  --nexus-red-soft: #EA3943;
+  --nexus-red-glow: rgba(255, 59, 92, 0.3);
+  --nexus-amber: #FFB800;
+  --nexus-amber-glow: rgba(255, 184, 0, 0.3);
+  --nexus-blue: #2E8BFF;
+  --nexus-purple: #A855F7;
 
   /* Text */
-  --nexus-text: #F1F5F9;
-  --nexus-text-2: #94A3B8;
-  --nexus-text-3: #475569;
+  --nexus-text: #E6EDF3;
+  --nexus-text-2: #8B98A8;
+  --nexus-text-3: #4A5568;
 
-  /* NEXUS Score Colors */
-  --score-elite: #10B981;
-  --score-strong: #22C55E;
-  --score-good: #84CC16;
-  --score-neutral: #F59E0B;
-  --score-weak: #F97316;
-  --score-sell: #EF4444;
+  /* Conviction / Score gradient */
+  --score-elite: #00FF94;
+  --score-strong: #5EEAD4;
+  --score-good: #06E5D4;
+  --score-neutral: #FFB800;
+  --score-weak: #FF8A3C;
+  --score-sell: #FF3B5C;
 
-  /* Radius */
-  --radius: 0.75rem;
+  --radius: 0.625rem;
 
-  /* Shadcn tokens (dark theme B3) */
-  --background: 216 50% 5%;
-  --foreground: 210 40% 95%;
-  --card: 217 45% 8%;
-  --card-foreground: 210 40% 95%;
-  --popover: 217 45% 8%;
-  --popover-foreground: 210 40% 95%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 216 50% 5%;
-  --secondary: 217 35% 14%;
-  --secondary-foreground: 210 40% 95%;
-  --muted: 217 35% 14%;
-  --muted-foreground: 215 20% 55%;
-  --accent: 217 35% 14%;
-  --accent-foreground: 210 40% 95%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 95%;
-  --border: 217 30% 15%;
-  --input: 217 35% 14%;
-  --ring: 217 91% 60%;
+  /* Shadcn tokens (terminal dark) */
+  --background: 222 50% 4%;
+  --foreground: 210 30% 92%;
+  --card: 220 38% 6%;
+  --card-foreground: 210 30% 92%;
+  --popover: 220 40% 5%;
+  --popover-foreground: 210 30% 92%;
+  --primary: 174 96% 46%;
+  --primary-foreground: 222 50% 4%;
+  --secondary: 217 30% 12%;
+  --secondary-foreground: 210 30% 92%;
+  --muted: 217 30% 11%;
+  --muted-foreground: 215 16% 52%;
+  --accent: 217 30% 13%;
+  --accent-foreground: 210 30% 92%;
+  --destructive: 350 100% 62%;
+  --destructive-foreground: 210 30% 95%;
+  --border: 217 28% 14%;
+  --input: 217 30% 12%;
+  --ring: 174 96% 46%;
 
-  --chart-1: 217 91% 60%;
-  --chart-2: 160 84% 39%;
-  --chart-3: 43 96% 56%;
-  --chart-4: 262 83% 58%;
-  --chart-5: 0 84% 60%;
+  --chart-1: 174 96% 46%;
+  --chart-2: 152 100% 50%;
+  --chart-3: 42 100% 50%;
+  --chart-4: 271 91% 65%;
+  --chart-5: 350 100% 62%;
 }
 
-/* Base */
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   background: var(--nexus-bg);
@@ -80,6 +80,7 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01';
 }
 
 @layer base {
@@ -87,130 +88,144 @@ body {
   body { @apply bg-background text-foreground; }
 }
 
-/* Mono font for numbers */
-.font-mono, .tabular-nums {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+/* Numbers always mono — terminal feel */
+.font-mono, .tabular-nums, .num {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-feature-settings: 'tnum';
 }
 
-/* Custom scrollbar */
+/* ═══ Scrollbar ═══ */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--nexus-bg); }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--nexus-border-2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--nexus-text-3); }
+::-webkit-scrollbar-thumb:hover { background: var(--nexus-border-glow); }
 
-/* Glow utilities */
-.glow-blue { box-shadow: 0 0 24px var(--nexus-blue-glow); }
-.glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); }
-.glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
-
-/* Glass card effect */
-.glass-card {
-  background: rgba(13, 20, 38, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--nexus-border);
+/* ═══ Terminal grid background ═══ */
+.terminal-grid {
+  background-image:
+    linear-gradient(rgba(6, 229, 212, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 229, 212, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-/* Gradient text */
-.text-gradient-blue {
-  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.text-gradient-green {
-  background: linear-gradient(135deg, #10B981, #22D3EE);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Score meter */
-.score-bar {
-  height: 6px;
-  border-radius: 3px;
-  background: var(--nexus-border);
-  overflow: hidden;
-}
-.score-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 1s ease-out;
-}
-
-/* Ticker animation */
-.ticker-track {
-  display: flex;
-  gap: 2rem;
-  animation: ticker 60s linear infinite;
-  white-space: nowrap;
-}
-.ticker-track:hover { animation-play-state: paused; }
-
-@keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* Pulse dot */
-.live-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--nexus-green);
-  border-radius: 50%;
-  animation: pulse-live 2s ease-in-out infinite;
-}
-
-@keyframes pulse-live {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-}
-
-/* Shimmer skeleton */
-.shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--nexus-surface) 25%,
-    var(--nexus-surface-3) 50%,
-    var(--nexus-surface) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s linear infinite;
-}
-
-@keyframes shimmer {
-  from { background-position: 200% 0; }
-  to { background-position: -200% 0; }
-}
-
-/* Card hover */
-.nexus-card {
-  background: var(--nexus-surface);
+/* ═══ Cards ═══ */
+.term-card {
+  background: linear-gradient(180deg, var(--nexus-surface) 0%, var(--nexus-bg-2) 100%);
   border: 1px solid var(--nexus-border);
   border-radius: var(--radius);
+  position: relative;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.nexus-card:hover {
+.term-card:hover {
   border-color: var(--nexus-border-2);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+.term-card-glow {
+  border-color: var(--nexus-border-glow);
+  box-shadow: 0 0 0 1px rgba(6, 229, 212, 0.08), 0 8px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* Buy/Sell signals */
-.signal-buy {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10B981;
-}
-.signal-sell {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #EF4444;
-}
-.signal-hold {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #F59E0B;
+/* Top accent line on cards */
+.term-card-accent::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 12px; right: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--nexus-cyan), transparent);
+  opacity: 0.4;
 }
 
-/* Candlestick colors */
-.candle-up { fill: #10B981; stroke: #10B981; }
-.candle-down { fill: #EF4444; stroke: #EF4444; }
+/* ═══ Glow utilities ═══ */
+.glow-cyan { box-shadow: 0 0 24px var(--nexus-cyan-glow); }
+.glow-green { box-shadow: 0 0 24px var(--nexus-green-glow); }
+.glow-red { box-shadow: 0 0 24px var(--nexus-red-glow); }
+.glow-amber { box-shadow: 0 0 24px var(--nexus-amber-glow); }
+.text-glow-cyan { text-shadow: 0 0 12px var(--nexus-cyan-glow); }
+.text-glow-green { text-shadow: 0 0 12px var(--nexus-green-glow); }
+
+/* ═══ Gradient text ═══ */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #06E5D4, #00FF94);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.text-gradient-neon {
+  background: linear-gradient(135deg, #06E5D4 0%, #2E8BFF 50%, #A855F7 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+/* ═══ Signal pills ═══ */
+.signal-buy { background: rgba(0, 255, 148, 0.12); border: 1px solid rgba(0, 255, 148, 0.35); color: #00FF94; }
+.signal-sell { background: rgba(255, 59, 92, 0.12); border: 1px solid rgba(255, 59, 92, 0.35); color: #FF3B5C; }
+.signal-hold { background: rgba(255, 184, 0, 0.12); border: 1px solid rgba(255, 184, 0, 0.35); color: #FFB800; }
+
+/* ═══ Live dot ═══ */
+.live-dot {
+  width: 7px; height: 7px; background: var(--nexus-green); border-radius: 50%;
+  animation: pulse-live 2s ease-in-out infinite;
+}
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 148, 0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 5px rgba(0, 255, 148, 0); }
+}
+
+/* ═══ Ticker ═══ */
+.ticker-track { display: flex; gap: 1.75rem; animation: ticker 70s linear infinite; white-space: nowrap; }
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ═══ Shimmer skeleton ═══ */
+.shimmer {
+  background: linear-gradient(90deg, var(--nexus-surface) 25%, var(--nexus-surface-3) 50%, var(--nexus-surface) 75%);
+  background-size: 200% 100%; animation: shimmer 1.5s linear infinite;
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* ═══ Score bar ═══ */
+.score-bar { height: 5px; border-radius: 3px; background: var(--nexus-border); overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* ═══ Radar sweep animation ═══ */
+@keyframes radar-sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.radar-sweep { animation: radar-sweep 4s linear infinite; transform-origin: center; }
+
+@keyframes radar-ping {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.radar-ping { animation: radar-ping 2.5s ease-out infinite; }
+
+/* ═══ Conviction gauge fill ═══ */
+@keyframes gauge-fill { from { stroke-dashoffset: var(--circ); } }
+
+/* ═══ Fade in ═══ */
+@keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* ═══ Glow pulse for hot items ═══ */
+@keyframes hot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(6, 229, 212, 0); }
+  50% { box-shadow: 0 0 16px 0 rgba(6, 229, 212, 0.25); }
+}
+.hot-pulse { animation: hot-pulse 2.5s ease-in-out infinite; }
+
+/* ═══ Data flicker for live numbers ═══ */
+.flicker-up { animation: flick-up 0.6s ease; }
+.flicker-down { animation: flick-down 0.6s ease; }
+@keyframes flick-up { 0% { color: var(--nexus-green); } 100% {} }
+@keyframes flick-down { 0% { color: var(--nexus-red); } 100% {} }
+
+/* ═══ Section label ═══ */
+.term-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--nexus-text-3);
+}
+
+/* ═══ Mini sparkline container ═══ */
+.spark { display: inline-block; vertical-align: middle; }
+
+/* Prose for markdown */
+.prose-terminal { color: var(--nexus-text-2); font-size: 13px; line-height: 1.6; }
+.prose-terminal strong { color: var(--nexus-text); }
+.prose-terminal h1, .prose-terminal h2, .prose-terminal h3 { color: var(--nexus-cyan); font-weight: 700; margin-top: 1em; margin-bottom: 0.4em; }
+.prose-terminal ul { margin: 0.4em 0; padding-left: 1.1em; }
+.prose-terminal li { margin: 0.2em 0; }
+.prose-terminal code { background: var(--nexus-surface-3); padding: 1px 5px; border-radius: 4px; color: var(--nexus-cyan); font-size: 12px; }

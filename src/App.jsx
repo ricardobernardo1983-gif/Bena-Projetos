@@ -6,6 +6,9 @@ import Layout from './Layout'
 // Pages
 import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
+import DecisionCockpit from './pages/DecisionCockpit'
+import OpportunityRadar from './pages/OpportunityRadar'
+import MonteCarloSimulator from './pages/MonteCarloSimulator'
 import SmartOpportunities from './pages/SmartOpportunities'
 import MarketScanner from './pages/MarketScanner'
 import Portfolio from './pages/Portfolio'
@@ -48,6 +51,9 @@ export default function App() {
         <Route path="/" element={<Navigate to="/onboarding" replace />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
+        <Route path="/cockpit" element={<PageWrapper><DecisionCockpit /></PageWrapper>} />
+        <Route path="/radar" element={<PageWrapper><OpportunityRadar /></PageWrapper>} />
+        <Route path="/monte-carlo" element={<PageWrapper><MonteCarloSimulator /></PageWrapper>} />
         <Route path="/smart-opportunities" element={<PageWrapper><SmartOpportunities /></PageWrapper>} />
         <Route path="/market-scanner" element={<PageWrapper><MarketScanner /></PageWrapper>} />
         <Route path="/portfolio" element={<PageWrapper><Portfolio /></PageWrapper>} />

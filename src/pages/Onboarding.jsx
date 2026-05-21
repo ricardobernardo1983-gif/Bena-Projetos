@@ -1,17 +1,25 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { LineChart, Brain, Shield, TrendingUp, Zap, BarChart3, ChevronRight, Eye, EyeOff } from 'lucide-react'
+import { Activity, Brain, Shield, TrendingUp, Zap, BarChart3, ChevronRight, Eye, EyeOff, Crosshair, Radar, Dices } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
+const LineChart = Activity
+
+const FLAGSHIP_FEATURES = [
+  { icon: Crosshair, title: 'Decision Cockpit', tag: 'EXCLUSIVO', desc: 'Tese de investimento completa gerada por IA: cenários Bull/Base/Bear ponderados por probabilidade, preço-justo, zonas de entrada/stop/alvo e medidor de convicção.', color: '#06E5D4' },
+  { icon: Radar, title: 'Radar de Oportunidades', tag: 'EXCLUSIVO', desc: 'Radar animado que varre o mercado em tempo real plotando ações por Risco × Retorno. Identifica visualmente a "zona ideal" de cada ativo.', color: '#00FF94' },
+  { icon: Dices, title: 'Simulador Monte Carlo', tag: 'EXCLUSIVO', desc: 'Projeta 5.000 futuros possíveis da sua carteira. Calcula a probabilidade real de atingir sua meta financeira em 1-30 anos.', color: '#A855F7' },
+]
+
 const FEATURES = [
-  { icon: Brain, title: 'NEXUS Score IA', desc: 'Score proprietário 0-100 combinando análise técnica + fundamentalista + momentum', color: '#3B82F6' },
-  { icon: TrendingUp, title: 'Oportunidades do Dia', desc: 'Sinais de compra e venda em tempo real com probabilidade de lucro calculada por IA', color: '#10B981' },
-  { icon: BarChart3, title: 'Backtest Avançado', desc: 'Teste qualquer estratégia em 5 anos de dados reais da B3 com métricas profissionais', color: '#F59E0B' },
-  { icon: Shield, title: 'Gestão de Risco', desc: 'VaR, Sharpe Ratio, Drawdown máximo e análise de correlação da carteira', color: '#8B5CF6' },
-  { icon: Zap, title: 'Scanner B3 ao Vivo', desc: 'Varredura em tempo real de todas as ações com filtros avançados e alertas customizados', color: '#EF4444' },
+  { icon: Brain, title: 'NEXUS Score IA', desc: 'Score proprietário 0-100 combinando análise técnica + fundamentalista + momentum', color: '#06E5D4' },
+  { icon: TrendingUp, title: 'Oportunidades do Dia', desc: 'Sinais de compra e venda em tempo real com probabilidade de lucro calculada por IA', color: '#00FF94' },
+  { icon: BarChart3, title: 'Backtest Avançado', desc: 'Teste qualquer estratégia em 5 anos de dados reais da B3 com métricas profissionais', color: '#FFB800' },
+  { icon: Shield, title: 'Gestão de Risco', desc: 'VaR, Sharpe Ratio, Drawdown máximo e análise de correlação da carteira', color: '#A855F7' },
+  { icon: Zap, title: 'Scanner B3 ao Vivo', desc: 'Varredura em tempo real de todas as ações com filtros avançados e alertas customizados', color: '#FF3B5C' },
 ]
 
 export default function Onboarding() {
@@ -167,64 +175,91 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070B14] overflow-x-hidden">
+    <div className="min-h-screen bg-[#05070D] overflow-x-hidden terminal-grid">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-[#1E2D42]/50">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-[#1A2230]/60">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
-            <LineChart className="w-4.5 h-4.5 text-white" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#06E5D4] to-[#0891B2] flex items-center justify-center" style={{ boxShadow: '0 0 16px rgba(6,229,212,0.3)' }}>
+            <Activity className="w-4 h-4 text-[#05070D]" />
           </div>
-          <span className="text-lg font-bold text-white">NEXUS B3</span>
+          <span className="text-lg font-bold text-white">NEXUS <span className="text-[#06E5D4]">B3</span></span>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setMode('login')} className="text-sm text-slate-400 hover:text-white transition-colors">
+          <button onClick={() => setMode('login')} className="text-sm text-[#8B98A8] hover:text-white transition-colors">
             Entrar
           </button>
-          <Button onClick={() => setMode('signup')} className="bg-blue-600 hover:bg-blue-700 text-white text-sm h-8 px-4">
+          <Button onClick={() => setMode('signup')} className="bg-[#06E5D4] hover:bg-[#05c4b6] text-[#05070D] font-semibold text-sm h-8 px-4">
             Começar Grátis
           </Button>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
+      <section className="max-w-6xl mx-auto px-6 pt-20 pb-12 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <div className="inline-flex items-center gap-2 bg-blue-600/10 border border-blue-600/30 rounded-full px-4 py-1.5 mb-6">
-            <span className="text-[11px] text-blue-400 font-semibold uppercase tracking-wider">
-              A plataforma de análise de ações mais avançada do Brasil
+          <div className="inline-flex items-center gap-2 bg-[#06E5D4]/10 border border-[#06E5D4]/30 rounded-full px-4 py-1.5 mb-6">
+            <span className="live-dot" />
+            <span className="text-[11px] text-[#06E5D4] font-semibold uppercase tracking-wider">
+              O terminal de análise de ações mais avançado do Brasil
             </span>
           </div>
           <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-6">
-            Inteligência Artificial<br />
-            <span className="text-gradient-blue">para a B3</span>
+            Decida comprar ou vender<br />
+            <span className="text-gradient-cyan">com convicção de IA</span>
           </h1>
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            NEXUS Score proprietário + análise técnica + fundamentalista + backtest.
-            As melhores oportunidades da Bolsa entregues diariamente pela nossa IA.
+          <p className="text-xl text-[#8B98A8] max-w-2xl mx-auto mb-10 leading-relaxed">
+            Tese completa por ativo, radar de oportunidades em tempo real e simulação de
+            futuros da sua carteira. Ferramentas que nenhum outro app brasileiro tem.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <Button
               onClick={() => setMode('signup')}
-              className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-8 text-base font-semibold"
+              className="bg-[#06E5D4] hover:bg-[#05c4b6] text-[#05070D] h-12 px-8 text-base font-semibold"
+              style={{ boxShadow: '0 0 24px rgba(6,229,212,0.35)' }}
             >
               Começar 14 Dias Grátis
               <ChevronRight className="w-4 h-4" />
             </Button>
             <button
               onClick={handleDemoAccess}
-              className="h-12 px-8 text-base text-slate-400 hover:text-white border border-[#1E2D42] hover:border-[#2E3D52] rounded-lg transition-all"
+              className="h-12 px-8 text-base text-[#8B98A8] hover:text-white border border-[#1A2230] hover:border-[#232E40] rounded-lg transition-all"
             >
               Ver Demo →
             </button>
           </div>
-          <p className="text-xs text-slate-600 mt-4">Sem cartão de crédito • Cancele quando quiser</p>
+          <p className="text-xs text-[#4A5568] mt-4">Sem cartão de crédito • Cancele quando quiser</p>
         </motion.div>
+      </section>
+
+      {/* Flagship features */}
+      <section className="max-w-6xl mx-auto px-6 pb-12">
+        <div className="text-center mb-8">
+          <span className="text-[11px] text-[#06E5D4] font-bold tracking-widest uppercase">Exclusivo NEXUS</span>
+          <h2 className="text-2xl font-bold text-white mt-1">3 ferramentas que ninguém mais tem</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {FLAGSHIP_FEATURES.map((f, i) => {
+            const Icon = f.icon
+            return (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.12 }}
+                className="term-card term-card-accent p-6 relative overflow-hidden">
+                <div className="absolute top-3 right-3 text-[8px] font-bold px-1.5 py-0.5 rounded text-[#06E5D4] bg-[#06E5D4]/10 border border-[#06E5D4]/30 tracking-wider">{f.tag}</div>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: `${f.color}15`, border: `1px solid ${f.color}30`, boxShadow: `0 0 20px ${f.color}25` }}>
+                  <Icon style={{ color: f.color, width: 24, height: 24 }} />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">{f.title}</h3>
+                <p className="text-sm text-[#8B98A8] leading-relaxed">{f.desc}</p>
+              </motion.div>
+            )
+          })}
+        </div>
       </section>
 
       {/* Features */}
       <section className="max-w-6xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold text-white text-center mb-10">
-          Tudo que os melhores traders usam, em uma plataforma
+          E tudo que os melhores traders usam, em um só lugar
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {FEATURES.map((f, i) => {
@@ -234,15 +269,15 @@ export default function Onboarding() {
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-5 hover:border-[#2E3D52] transition-all"
+                transition={{ delay: i * 0.08 }}
+                className="term-card p-5"
               >
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
-                  style={{ background: `${f.color}20` }}>
+                  style={{ background: `${f.color}18`, border: `1px solid ${f.color}30` }}>
                   <Icon style={{ color: f.color, width: 20, height: 20 }} />
                 </div>
                 <h3 className="text-base font-semibold text-white mb-2">{f.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{f.desc}</p>
+                <p className="text-sm text-[#8B98A8] leading-relaxed">{f.desc}</p>
               </motion.div>
             )
           })}

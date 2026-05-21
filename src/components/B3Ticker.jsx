@@ -45,10 +45,10 @@ export default function B3Ticker() {
   const items = [...tickers, ...tickers]
 
   return (
-    <div className="h-8 border-b border-[#1E2D42] bg-[#070B14] overflow-hidden flex items-center shrink-0">
-      <div className="flex items-center gap-1 px-3 shrink-0 border-r border-[#1E2D42]">
+    <div className="h-8 border-b border-[#1A2230] bg-[#070A12] overflow-hidden flex items-center shrink-0">
+      <div className="flex items-center gap-1.5 px-3 shrink-0 border-r border-[#1A2230]">
         <div className="live-dot" />
-        <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Ao Vivo</span>
+        <span className="text-[10px] text-[#4A5568] font-medium uppercase tracking-wider">B3 Ao Vivo</span>
       </div>
       <div className="overflow-hidden flex-1">
         <div className="ticker-track">
@@ -60,24 +60,24 @@ export default function B3Ticker() {
                 {isPos ? (
                   <TrendingUp className="w-3 h-3 text-emerald-400" />
                 ) : isNeg ? (
-                  <TrendingDown className="w-3 h-3 text-red-400" />
+                  <TrendingDown className="w-3 h-3 text-[#FF3B5C]" />
                 ) : (
-                  <Minus className="w-3 h-3 text-slate-500" />
+                  <Minus className="w-3 h-3 text-[#4A5568]" />
                 )}
-                <span className="text-[11px] text-slate-300 font-semibold">{t.name}</span>
+                <span className="text-[11px] text-[#8B98A8] font-semibold num">{t.name}</span>
                 {t.value !== undefined && (
-                  <span className="text-[11px] text-slate-500 font-mono">
+                  <span className="text-[11px] text-[#4A5568] num">
                     {t.value?.toFixed(2)}
                   </span>
                 )}
                 <span
-                  className={`text-[11px] font-semibold tabular-nums ${
-                    isPos ? 'text-emerald-400' : isNeg ? 'text-red-400' : 'text-slate-400'
+                  className={`text-[11px] font-semibold num ${
+                    isPos ? 'text-[#00FF94]' : isNeg ? 'text-[#FF3B5C]' : 'text-[#8B98A8]'
                   }`}
                 >
                   {formatPercent(t.change)}
                 </span>
-                <span className="text-slate-700 ml-2">│</span>
+                <span className="text-[#1A2230] ml-2">│</span>
               </div>
             )
           })}
