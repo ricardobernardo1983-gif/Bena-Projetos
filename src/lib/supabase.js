@@ -1,14 +1,37 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+const DEMO_USER = {
+  id: 'demo-user',
+  email: 'demo@nexusb3.com.br',
+  user_metadata: { full_name: 'Usuário Demo' },
+}
+
+/* Mock client for demo mode (no Supabase configured) */
+const mockClient = {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
+    getUser: async () => ({ data: { user: DEMO_USER }, error: null }),
+    getSession: async () => ({ data: { session: null }, error: null }),
+    signInWithPassword: async () => ({ data: { user: DEMO_USER }, error: null }),
+    signUp: async () => ({ data: { user: DEMO_USER }, error: null }),
+    signOut: async () => ({ error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
   },
-})
+  from: () => ({
+    select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }), data: [], error: null }), order: () => ({ data: [], error: null }) }),
+    insert: async () => ({ data: null, error: null }),
+    upsert: async () => ({ data: null, error: null }),
+    delete: () => ({ eq: async () => ({ data: null, error: null }) }),
+  }),
+}
+
+export const supabase = supabaseUrl && supabaseKey
+  ? createClient(supabaseUrl, supabaseKey, {
+      auth: { persistSession: true, autoRefreshToken: true },
+    })
+  : mockClient
 
 /* ─── Auth helpers ──────────────────────────────────────────── */
 export async function signInWithEmail(email, password) {
