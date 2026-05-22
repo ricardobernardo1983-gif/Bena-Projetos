@@ -21,6 +21,7 @@ export const RISK_PROFILES = {
     // Núcleo: pagadoras de dividendo, utilities, bancos, baixo beta
     core: ['TAEE11', 'ITUB4', 'BBAS3', 'ELET3', 'VIVT3', 'ABEV3', 'ENGI11', 'CPFE3', 'BBDC4', 'TIMS3'],
     weights: { technical: 0.30, fundamental: 0.45, momentum: 0.10, dividend: 0.15 },
+    mc: { annualReturn: 9, annualVol: 8 }, // params padrão do Monte Carlo
   },
   moderado: {
     key: 'moderado',
@@ -33,6 +34,7 @@ export const RISK_PROFILES = {
     focus: 'Blue chips equilibradas e diversificação',
     core: ['VALE3', 'PETR4', 'ITUB4', 'BBAS3', 'TOTVS3', 'ABEV3', 'BBDC4', 'PRIO3', 'RDOR3', 'LREN3'],
     weights: { technical: 0.40, fundamental: 0.35, momentum: 0.15, dividend: 0.10 },
+    mc: { annualReturn: 14, annualVol: 16 },
   },
   agressivo: {
     key: 'agressivo',
@@ -45,6 +47,7 @@ export const RISK_PROFILES = {
     focus: 'Crescimento, momentum e small caps',
     core: ['MGLU3', 'PRIO3', 'RRRP3', 'AZUL4', 'TOTVS3', 'LWSA3', 'GOLL4', 'SOMA3', 'CSNA3', 'RAIL3'],
     weights: { technical: 0.50, fundamental: 0.20, momentum: 0.25, dividend: 0.05 },
+    mc: { annualReturn: 20, annualVol: 28 },
   },
 }
 
@@ -80,6 +83,59 @@ export function saveProfile(patch) {
 export function getProfileCore(key) {
   const k = key || getActiveProfileKey()
   return RISK_PROFILES[k]?.core || RISK_PROFILES.moderado.core
+}
+
+export function getProfileMC(key) {
+  const k = key || getActiveProfileKey()
+  return RISK_PROFILES[k]?.mc || RISK_PROFILES.moderado.mc
+}
+
+/*
+ * Sincronização opcional com Supabase. Funciona como best-effort:
+ * - localStorage é sempre a fonte imediata (offline-first)
+ * - se o Supabase estiver configurado e houver usuário logado, espelha lá
+ * Importa supabase de forma dinâmica p/ não acoplar nem quebrar no modo demo.
+ */
+export async function syncProfileToSupabase(patch) {
+  try {
+    if (!import.meta.env.VITE_SUPABASE_URL) return { synced: false }
+    const { supabase } = await import('@/lib/supabase')
+    const { data } = await supabase.auth.getUser()
+    if (!data?.user) return { synced: false }
+    await supabase.from('profiles').upsert({
+      id: data.user.id,
+      full_name: patch.full_name,
+      risk_profile: patch.risk_profile,
+      investment_goals: patch.investment_goals,
+      notifications: patch.notifications,
+      updated_at: new Date().toISOString(),
+    })
+    return { synced: true }
+  } catch {
+    return { synced: false }
+  }
+}
+
+export async function loadProfileFromSupabase() {
+  try {
+    if (!import.meta.env.VITE_SUPABASE_URL) return null
+    const { supabase } = await import('@/lib/supabase')
+    const { data } = await supabase.auth.getUser()
+    if (!data?.user) return null
+    const { data: prof } = await supabase.from('profiles').select('*').eq('id', data.user.id).single()
+    if (prof) {
+      // espelha no localStorage p/ uso offline-first
+      saveProfile({
+        full_name: prof.full_name,
+        risk_profile: prof.risk_profile,
+        investment_goals: prof.investment_goals,
+        notifications: prof.notifications,
+      })
+    }
+    return prof || null
+  } catch {
+    return null
+  }
 }
 
 /*

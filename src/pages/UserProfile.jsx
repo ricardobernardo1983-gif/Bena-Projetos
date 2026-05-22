@@ -3,7 +3,7 @@ import { Settings, User, Bell, Shield, Key, Save, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import InfoTooltip from '@/components/InfoTooltip'
-import { RISK_PROFILES, saveProfile } from '@/lib/profile'
+import { RISK_PROFILES, saveProfile, syncProfileToSupabase } from '@/lib/profile'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
@@ -32,15 +32,20 @@ export default function UserProfile() {
 
   async function handleSave() {
     setSaving(true)
-    saveProfile({
+    const payload = {
       full_name: profile.full_name,
       risk_profile: profile.risk_profile,
       investment_goals: profile.investment_goals,
       notifications: profile.notifications,
-    })
-    await new Promise(r => setTimeout(r, 400))
+    }
+    saveProfile(payload)
+    const { synced } = await syncProfileToSupabase(payload)
     setSaving(false)
-    toast.success('Perfil salvo! O núcleo de ações e as análises foram recalibrados.')
+    toast.success(
+      synced
+        ? 'Perfil salvo e sincronizado na nuvem! Sistema recalibrado.'
+        : 'Perfil salvo! O núcleo de ações e as análises foram recalibrados.'
+    )
   }
 
   const TABS = [

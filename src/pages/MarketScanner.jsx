@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Zap, TrendingUp, TrendingDown, RefreshCw, Search, Filter, Radio } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -7,6 +7,8 @@ import DataSourceBadge from '@/components/DataSourceBadge'
 import { generateMockQuote, generateHistoricalData, B3_STOCKS } from '@/lib/mockData'
 import { getStockData, isLiveEnabled } from '@/lib/marketData'
 import { calculateNexusScore } from '@/lib/nexusScore'
+import { scoreForRadar } from '@/lib/decisionEngine'
+import { getActiveProfile, getProfileCore, profileFit } from '@/lib/profile'
 import { formatPercent, getChangeColor, getChangeBg, formatVolume } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -21,10 +23,13 @@ const PRESETS = [
 ]
 
 export default function MarketScanner() {
+  const profile = useMemo(() => getActiveProfile(), [])
+  const coreSet = useMemo(() => new Set(getProfileCore(profile.risk_profile)), [profile])
   const [allStocks, setAllStocks] = useState([])
   const [filtered, setFiltered] = useState([])
   const [search, setSearch] = useState('')
   const [preset, setPreset] = useState(null)
+  const [profileOnly, setProfileOnly] = useState(false)
   const [sector, setSector] = useState('Todos')
   const [sortBy, setSortBy] = useState('nexus')
   const [loading, setLoading] = useState(true)
@@ -36,7 +41,7 @@ export default function MarketScanner() {
 
   useEffect(() => { loadData() }, [])
 
-  useEffect(() => { applyFilters() }, [allStocks, search, preset, sector, sortBy])
+  useEffect(() => { applyFilters() }, [allStocks, search, preset, profileOnly, sector, sortBy])
 
   function loadData() {
     setLoading(true)
@@ -44,7 +49,9 @@ export default function MarketScanner() {
       const q = generateMockQuote(stock.ticker)
       const hist = generateHistoricalData(80, q.price)
       const nexus = calculateNexusScore({ historicalData: hist, fundamentals: q })
-      return { ...stock, ...q, nexusScore: nexus, source: 'mock' }
+      const radar = scoreForRadar({ ...stock, quote: q, fundamentals: q, historicalData: hist })
+      const fit = profileFit(radar.riskScore, profile.risk_profile).fit
+      return { ...stock, ...q, nexusScore: nexus, source: 'mock', riskScore: radar.riskScore, fit, isCore: coreSet.has(stock.ticker) }
     })
     setAllStocks(data)
     setLoading(false)
@@ -58,7 +65,7 @@ export default function MarketScanner() {
     setLiveProgress(0)
     let done = 0
     for (const stock of targets) {
-      const d = await getStockData(stock.ticker, { history: true, range: '3mo' })
+      const d = await getStockData(stock.ticker, { history: true })
       const nexus = calculateNexusScore({ historicalData: d.historicalData, fundamentals: d.quote })
       setAllStocks((prev) => prev.map((s) =>
         s.ticker === stock.ticker ? { ...s, ...d.quote, nexusScore: nexus, source: d.source } : s
@@ -76,7 +83,9 @@ export default function MarketScanner() {
     if (search) result = result.filter(s => s.ticker.includes(search.toUpperCase()) || s.name.toLowerCase().includes(search.toLowerCase()))
     if (sector !== 'Todos') result = result.filter(s => s.sector === sector)
     if (preset !== null) result = result.filter(PRESETS[preset].filter)
+    if (profileOnly) result = result.filter(s => s.fit >= 55)
     result.sort((a, b) => {
+      if (sortBy === 'fit') return (b.fit || 0) - (a.fit || 0)
       if (sortBy === 'nexus') return b.nexusScore.score - a.nexusScore.score
       if (sortBy === 'change') return b.changePercent - a.changePercent
       if (sortBy === 'volume') return b.volume - a.volume
@@ -120,12 +129,23 @@ export default function MarketScanner() {
 
       {/* Preset filters */}
       <div className="flex gap-2 flex-wrap">
+        <button
+          onClick={() => setProfileOnly(!profileOnly)}
+          className="text-xs px-3 py-1.5 rounded-lg font-bold transition-colors border flex items-center gap-1"
+          style={profileOnly
+            ? { background: `${profile.color}18`, color: profile.color, borderColor: `${profile.color}80` }
+            : { background: '#0A0E18', color: '#8B98A8', borderColor: '#1A2230' }}
+          title={`Mostra apenas ativos adequados ao perfil ${profile.label}`}
+        >
+          {profile.emoji} Adequados ao meu perfil
+        </button>
+        <span className="w-px bg-[#1A2230] self-stretch" />
         {PRESETS.map((p, i) => (
           <button
             key={i}
             onClick={() => setPreset(preset === i ? null : i)}
             className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors border ${
-              preset === i ? 'bg-[#06E5D4] text-white border-[#06E5D4]' : 'bg-[#0A0E18] text-slate-400 border-[#1A2230] hover:border-[#232E40]'
+              preset === i ? 'bg-[#06E5D4] text-[#05070D] border-[#06E5D4]' : 'bg-[#0A0E18] text-slate-400 border-[#1A2230] hover:border-[#232E40]'
             }`}
           >
             {p.label}
@@ -147,6 +167,7 @@ export default function MarketScanner() {
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}
           className="text-sm bg-[#0A0E18] border border-[#1A2230] text-slate-300 rounded-lg px-3 py-2">
           <option value="nexus">NEXUS Score</option>
+          <option value="fit">Adequação ao perfil</option>
           <option value="change">Variação %</option>
           <option value="volume">Volume</option>
           <option value="price">Preço</option>
@@ -193,6 +214,13 @@ export default function MarketScanner() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <p className="font-bold text-white num">{stock.ticker}</p>
+                        {stock.isCore && (
+                          <span className="text-[8px] font-bold px-1 py-0.5 rounded shrink-0"
+                            title={`Núcleo do perfil ${profile.label}`}
+                            style={{ color: profile.color, background: `${profile.color}18`, border: `1px solid ${profile.color}40` }}>
+                            {profile.emoji}
+                          </span>
+                        )}
                         {(stock.source === 'live' || stock.source === 'cache') && (
                           <span className="w-1.5 h-1.5 rounded-full shrink-0" title="Dados reais"
                             style={{ background: stock.source === 'live' ? '#00FF94' : '#06E5D4' }} />

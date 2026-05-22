@@ -7,6 +7,7 @@ import {
 import { Button } from '@/components/ui/button'
 import InfoTooltip from '@/components/InfoTooltip'
 import { runMonteCarlo, probabilityOfTarget, buildHistogram } from '@/lib/decisionEngine'
+import { getActiveProfile, getProfileMC } from '@/lib/profile'
 import { formatCurrency } from '@/lib/utils'
 
 const PRESETS = [
@@ -17,11 +18,13 @@ const PRESETS = [
 ]
 
 export default function MonteCarloSimulator() {
+  const profile = useMemo(() => getActiveProfile(), [])
+  const mc = useMemo(() => getProfileMC(profile.risk_profile), [profile])
   const [config, setConfig] = useState({
     initialValue: 100000,
     monthlyContribution: 1000,
-    annualReturn: 14,
-    annualVol: 16,
+    annualReturn: mc.annualReturn,
+    annualVol: mc.annualVol,
     years: 5,
     target: 250000,
   })
@@ -72,7 +75,11 @@ export default function MonteCarloSimulator() {
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#06E5D4]/10 text-[#06E5D4] border border-[#06E5D4]/30">FLAGSHIP</span>
               <InfoTooltip term="montecarlo" iconSize={12} />
             </h1>
-            <p className="text-xs text-[#8B98A8]">5.000 simulações de futuros possíveis da sua carteira</p>
+            <p className="text-xs text-[#8B98A8] flex items-center gap-1.5">
+              5.000 simulações · parâmetros iniciais do perfil
+              <span className="font-semibold" style={{ color: profile.color }}>{profile.emoji} {profile.label}</span>
+              <InfoTooltip text={`Retorno e volatilidade iniciais (${mc.annualReturn}% a.a. / ${mc.annualVol}%) refletem o perfil ${profile.label}. Ajuste livremente abaixo.`} iconSize={10} />
+            </p>
           </div>
         </div>
 
