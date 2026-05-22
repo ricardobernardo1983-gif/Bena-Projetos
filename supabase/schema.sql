@@ -4,7 +4,7 @@
 -- ============================================================
 
 -- Profiles
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users PRIMARY KEY,
   full_name TEXT,
   risk_profile TEXT DEFAULT 'moderado',
@@ -16,7 +16,7 @@ CREATE TABLE profiles (
 );
 
 -- Portfolios
-CREATE TABLE portfolios (
+CREATE TABLE IF NOT EXISTS portfolios (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users NOT NULL,
   name TEXT NOT NULL DEFAULT 'Minha Carteira',
@@ -25,7 +25,7 @@ CREATE TABLE portfolios (
 );
 
 -- Portfolio positions
-CREATE TABLE portfolio_positions (
+CREATE TABLE IF NOT EXISTS portfolio_positions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   portfolio_id UUID REFERENCES portfolios ON DELETE CASCADE,
   ticker TEXT NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE portfolio_positions (
 );
 
 -- Watchlist
-CREATE TABLE watchlist (
+CREATE TABLE IF NOT EXISTS watchlist (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users NOT NULL,
   ticker TEXT NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE watchlist (
 );
 
 -- Alerts
-CREATE TABLE alerts (
+CREATE TABLE IF NOT EXISTS alerts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users NOT NULL,
   ticker TEXT NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE alerts (
 );
 
 -- Journal entries
-CREATE TABLE journal_entries (
+CREATE TABLE IF NOT EXISTS journal_entries (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users NOT NULL,
   date DATE NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE journal_entries (
 );
 
 -- Backtests
-CREATE TABLE backtests (
+CREATE TABLE IF NOT EXISTS backtests (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users NOT NULL,
   name TEXT,
@@ -91,7 +91,11 @@ CREATE TABLE backtests (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- RLS Policies
+-- ============================================================
+-- RLS (Row Level Security) — cada usuário só acessa os próprios dados.
+-- IMPORTANTE: cada política usa FOR ALL + WITH CHECK para permitir
+-- SELECT, INSERT, UPDATE e DELETE do app (sem WITH CHECK o INSERT é bloqueado).
+-- ============================================================
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE portfolios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE portfolio_positions ENABLE ROW LEVEL SECURITY;
@@ -100,27 +104,58 @@ ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE backtests ENABLE ROW LEVEL SECURITY;
 
--- Allow users to only access their own data
-CREATE POLICY "users_own_data" ON profiles USING (auth.uid() = id);
-CREATE POLICY "users_own_portfolios" ON portfolios USING (auth.uid() = user_id);
-CREATE POLICY "users_own_positions" ON portfolio_positions USING (
-  auth.uid() = (SELECT user_id FROM portfolios WHERE id = portfolio_id)
-);
-CREATE POLICY "users_own_watchlist" ON watchlist USING (auth.uid() = user_id);
-CREATE POLICY "users_own_alerts" ON alerts USING (auth.uid() = user_id);
-CREATE POLICY "users_own_journal" ON journal_entries USING (auth.uid() = user_id);
-CREATE POLICY "users_own_backtests" ON backtests USING (auth.uid() = user_id);
+-- Profiles (chave = id)
+DROP POLICY IF EXISTS "profiles_own" ON profiles;
+CREATE POLICY "profiles_own" ON profiles
+  FOR ALL USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
--- Auto-create profile on signup
+-- Portfolios
+DROP POLICY IF EXISTS "portfolios_own" ON portfolios;
+CREATE POLICY "portfolios_own" ON portfolios
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Portfolio positions (dono via portfólio pai)
+DROP POLICY IF EXISTS "positions_own" ON portfolio_positions;
+CREATE POLICY "positions_own" ON portfolio_positions
+  FOR ALL
+  USING (auth.uid() = (SELECT user_id FROM portfolios WHERE id = portfolio_id))
+  WITH CHECK (auth.uid() = (SELECT user_id FROM portfolios WHERE id = portfolio_id));
+
+-- Watchlist
+DROP POLICY IF EXISTS "watchlist_own" ON watchlist;
+CREATE POLICY "watchlist_own" ON watchlist
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Alerts
+DROP POLICY IF EXISTS "alerts_own" ON alerts;
+CREATE POLICY "alerts_own" ON alerts
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Journal
+DROP POLICY IF EXISTS "journal_own" ON journal_entries;
+CREATE POLICY "journal_own" ON journal_entries
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Backtests
+DROP POLICY IF EXISTS "backtests_own" ON backtests;
+CREATE POLICY "backtests_own" ON backtests
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================
+-- Cria o perfil automaticamente quando um usuário se cadastra
+-- (SECURITY DEFINER ignora RLS; ON CONFLICT evita erro se já existir)
+-- ============================================================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
   INSERT INTO public.profiles (id, full_name)
-  VALUES (new.id, new.raw_user_meta_data->>'full_name');
+  VALUES (new.id, new.raw_user_meta_data->>'full_name')
+  ON CONFLICT (id) DO NOTHING;
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
