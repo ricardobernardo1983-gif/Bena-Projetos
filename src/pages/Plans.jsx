@@ -110,7 +110,7 @@ export default function Plans() {
           </button>
           <div
             className="relative w-12 h-6 rounded-full cursor-pointer transition-colors"
-            style={{ background: billing === 'yearly' ? '#8B5CF6' : '#1E2D42' }}
+            style={{ background: billing === 'yearly' ? '#8B5CF6' : '#1A2230' }}
             onClick={() => setBilling(billing === 'monthly' ? 'yearly' : 'monthly')}
           >
             <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${billing === 'yearly' ? 'translate-x-7' : 'translate-x-1'}`} />
@@ -133,8 +133,8 @@ export default function Plans() {
           return (
             <div
               key={plan.name}
-              className={`relative bg-[#0D1426] border rounded-2xl p-6 flex flex-col ${
-                plan.popular ? 'border-purple-600/60 shadow-lg shadow-purple-500/10' : 'border-[#1E2D42]'
+              className={`relative bg-[#0A0E18] border rounded-2xl p-6 flex flex-col ${
+                plan.popular ? 'border-purple-600/60 shadow-lg shadow-purple-500/10' : 'border-[#1A2230]'
               }`}
             >
               {plan.popular && (
@@ -206,8 +206,8 @@ export default function Plans() {
         ].map(card => {
           const Icon = card.icon
           return (
-            <div key={card.label} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4 flex items-center gap-3">
-              <Icon className="w-5 h-5 text-blue-400 shrink-0" />
+            <div key={card.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4 flex items-center gap-3">
+              <Icon className="w-5 h-5 text-[#06E5D4] shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-white">{card.label}</p>
                 <p className="text-xs text-slate-500">{card.desc}</p>
@@ -222,7 +222,7 @@ export default function Plans() {
         <h2 className="text-xl font-bold text-white text-center mb-6">Perguntas Frequentes</h2>
         <div className="space-y-3">
           {FAQS.map((faq) => (
-            <div key={faq.q} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+            <div key={faq.q} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
               <p className="text-sm font-semibold text-white mb-1">{faq.q}</p>
               <p className="text-sm text-slate-400">{faq.a}</p>
             </div>

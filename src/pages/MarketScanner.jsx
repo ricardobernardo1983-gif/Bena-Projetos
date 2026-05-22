@@ -74,12 +74,12 @@ export default function MarketScanner() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Zap className="w-6 h-6 text-blue-400" />
+            <Zap className="w-6 h-6 text-[#06E5D4]" />
             Scanner de Mercado
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">{filtered.length} de {allStocks.length} ações · B3</p>
         </div>
-        <Button size="sm" variant="outline" onClick={handleRefresh} disabled={refreshing} className="border-[#1E2D42] text-slate-400">
+        <Button size="sm" variant="outline" onClick={handleRefresh} disabled={refreshing} className="border-[#1A2230] text-slate-400">
           <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Atualizar
         </Button>
       </div>
@@ -91,7 +91,7 @@ export default function MarketScanner() {
             key={i}
             onClick={() => setPreset(preset === i ? null : i)}
             className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors border ${
-              preset === i ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#0D1426] text-slate-400 border-[#1E2D42] hover:border-[#2E3D52]'
+              preset === i ? 'bg-[#06E5D4] text-white border-[#06E5D4]' : 'bg-[#0A0E18] text-slate-400 border-[#1A2230] hover:border-[#232E40]'
             }`}
           >
             {p.label}
@@ -104,14 +104,14 @@ export default function MarketScanner() {
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar ativo..."
-            className="w-full bg-[#0D1426] border border-[#1E2D42] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-600" />
+            className="w-full bg-[#0A0E18] border border-[#1A2230] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-600" />
         </div>
         <select value={sector} onChange={(e) => setSector(e.target.value)}
-          className="text-sm bg-[#0D1426] border border-[#1E2D42] text-slate-300 rounded-lg px-3 py-2">
+          className="text-sm bg-[#0A0E18] border border-[#1A2230] text-slate-300 rounded-lg px-3 py-2">
           {sectors.map(s => <option key={s}>{s}</option>)}
         </select>
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}
-          className="text-sm bg-[#0D1426] border border-[#1E2D42] text-slate-300 rounded-lg px-3 py-2">
+          className="text-sm bg-[#0A0E18] border border-[#1A2230] text-slate-300 rounded-lg px-3 py-2">
           <option value="nexus">NEXUS Score</option>
           <option value="change">Variação %</option>
           <option value="volume">Volume</option>
@@ -121,11 +121,11 @@ export default function MarketScanner() {
       </div>
 
       {/* Table */}
-      <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl overflow-hidden">
+      <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1E2D42] text-[11px] text-slate-500 uppercase">
+              <tr className="border-b border-[#1A2230] text-[11px] text-slate-500 uppercase">
                 <th className="text-left px-4 py-3">NEXUS</th>
                 <th className="text-left px-4 py-3">Ativo</th>
                 <th className="text-right px-4 py-3">Preço</th>
@@ -137,7 +137,7 @@ export default function MarketScanner() {
                 <th className="text-center px-4 py-3">Sinal</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E2D42]/30">
+            <tbody className="divide-y divide-[#1A2230]/30">
               {loading ? (
                 [...Array(10)].map((_, i) => (
                   <tr key={i}>
@@ -152,7 +152,7 @@ export default function MarketScanner() {
                 const rsi = stock.nexusScore.technical?.rsi
                 const rec = stock.nexusScore.recommendation
                 return (
-                  <tr key={stock.ticker} className="hover:bg-[#111827] transition-colors cursor-pointer">
+                  <tr key={stock.ticker} className="hover:bg-[#0E141F] transition-colors cursor-pointer">
                     <td className="px-4 py-3">
                       <NexusScoreBadge score={stock.nexusScore.score} size="sm" showLabel={false} />
                     </td>

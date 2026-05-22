@@ -37,7 +37,7 @@ export default function FundamentalsLab() {
     <div className="p-6 max-w-screen-2xl mx-auto space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <BarChart3 className="w-6 h-6 text-blue-400" />
+          <BarChart3 className="w-6 h-6 text-[#06E5D4]" />
           Análise Fundamentalista
         </h1>
         <p className="text-slate-400 text-sm">P/L, P/VPA, ROE, EBITDA e muito mais</p>
@@ -49,10 +49,10 @@ export default function FundamentalsLab() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..."
-              className="w-full bg-[#0D1426] border border-[#1E2D42] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-600" />
+              className="w-full bg-[#0A0E18] border border-[#1A2230] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-600" />
           </div>
           <select value={sector} onChange={e => setSector(e.target.value)}
-            className="w-full text-sm bg-[#0D1426] border border-[#1E2D42] text-slate-300 rounded-lg px-3 py-2">
+            className="w-full text-sm bg-[#0A0E18] border border-[#1A2230] text-slate-300 rounded-lg px-3 py-2">
             {sectors.map(s => <option key={s}>{s}</option>)}
           </select>
           <div className="space-y-0.5 max-h-[calc(100vh-280px)] overflow-y-auto">
@@ -60,7 +60,7 @@ export default function FundamentalsLab() {
               <div key={stock.ticker}
                 onClick={() => setSelected(stock)}
                 className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                  selected?.ticker === stock.ticker ? 'bg-blue-600/15 border border-blue-600/30 text-blue-400' : 'hover:bg-[#0D1426] text-slate-400'
+                  selected?.ticker === stock.ticker ? 'bg-[#06E5D4]/15 border border-[#06E5D4]/30 text-[#06E5D4]' : 'hover:bg-[#0A0E18] text-slate-400'
                 }`}>
                 <div>
                   <p className="text-sm font-bold text-white">{stock.ticker}</p>
@@ -78,7 +78,7 @@ export default function FundamentalsLab() {
         {/* Right: fundamentals detail */}
         {selected && (
           <div className="flex-1 space-y-4">
-            <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+            <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h2 className="text-xl font-black text-white">{selected.ticker}</h2>
@@ -101,7 +101,7 @@ export default function FundamentalsLab() {
                   { label: 'Mg EBITDA', value: selected.ebitdaMargin ? `${selected.ebitdaMargin.toFixed(1)}%` : '—', info: 'Margem EBITDA', ok: selected.ebitdaMargin && selected.ebitdaMargin > 20 },
                   { label: 'Market Cap', value: formatLargeNumber(selected.marketCap), info: 'Capitalização', ok: true },
                 ].map(m => (
-                  <div key={m.label} className="bg-[#111827] rounded-xl p-3 text-center">
+                  <div key={m.label} className="bg-[#0E141F] rounded-xl p-3 text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <p className="text-[10px] text-slate-500 uppercase">{m.label}</p>
                       {m.ok !== undefined && (
@@ -120,7 +120,7 @@ export default function FundamentalsLab() {
                   <h3 className="text-xs font-semibold text-slate-400 uppercase mb-2">Radar Fundamentalista</h3>
                   <ResponsiveContainer width="100%" height={200}>
                     <RadarChart data={radarData}>
-                      <PolarGrid stroke="#1E2D42" />
+                      <PolarGrid stroke="#1A2230" />
                       <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: '#94A3B8' }} />
                       <Radar dataKey="value" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} />
                     </RadarChart>
@@ -140,7 +140,7 @@ export default function FundamentalsLab() {
                     { l: 'Máx 52sem', v: selected.fiftyTwoWeekHigh ? `R$ ${selected.fiftyTwoWeekHigh.toFixed(2)}` : '—' },
                     { l: 'Mín 52sem', v: selected.fiftyTwoWeekLow ? `R$ ${selected.fiftyTwoWeekLow.toFixed(2)}` : '—' },
                   ].map(m => (
-                    <div key={m.l} className="flex items-center justify-between py-1 border-b border-[#1E2D42]/50">
+                    <div key={m.l} className="flex items-center justify-between py-1 border-b border-[#1A2230]/50">
                       <span className="text-xs text-slate-500">{m.l}</span>
                       <span className="text-xs font-semibold text-white tabular-nums">{m.v}</span>
                     </div>
@@ -150,7 +150,7 @@ export default function FundamentalsLab() {
             </div>
 
             {/* Sector comparison */}
-            <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+            <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
               <h3 className="text-sm font-semibold text-white mb-3">Comparação com o Setor — {selected.sector}</h3>
               <ResponsiveContainer width="100%" height={160}>
                 <BarChart data={stocks.filter(s => s.sector === selected.sector).slice(0, 8).map(s => ({
@@ -161,10 +161,10 @@ export default function FundamentalsLab() {
                 }))}>
                   <XAxis dataKey="ticker" tick={{ fontSize: 10, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: '#475569' }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ background: '#0D1426', border: '1px solid #1E2D42', borderRadius: 8 }} />
+                  <Tooltip contentStyle={{ background: '#0A0E18', border: '1px solid #1A2230', borderRadius: 8 }} />
                   <Bar dataKey="pe" name="P/L" radius={[4, 4, 0, 0]}>
                     {stocks.filter(s => s.sector === selected.sector).slice(0, 8).map((s, i) => (
-                      <Cell key={i} fill={s.ticker === selected.ticker ? '#3B82F6' : '#1E2D42'} />
+                      <Cell key={i} fill={s.ticker === selected.ticker ? '#3B82F6' : '#1A2230'} />
                     ))}
                   </Bar>
                 </BarChart>

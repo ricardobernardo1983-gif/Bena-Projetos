@@ -78,7 +78,7 @@ export default function TraderJournal() {
           { label: 'Operações', value: closedTrades.length, color: '#3B82F6', sub: `${entries.filter(e => e.status === 'aberto').length} abertas` },
           { label: 'Ganhos / Perdas', value: `${wins.length} / ${losses.length}`, color: '#8B5CF6' },
         ].map(s => (
-          <div key={s.label} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+          <div key={s.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
             <p className="text-xs text-slate-500 uppercase font-medium">{s.label}</p>
             <p className="text-2xl font-bold tabular-nums mt-1" style={{ color: s.color }}>{s.value}</p>
             {s.sub && <p className="text-xs text-slate-500">{s.sub}</p>}
@@ -93,8 +93,8 @@ export default function TraderJournal() {
             ? entry.quantity * entry.price * (Math.abs(entry.result) / 100) * (entry.result >= 0 ? 1 : -1)
             : null
           return (
-            <div key={entry.id} className={`bg-[#0D1426] border rounded-xl p-4 ${
-              entry.status === 'aberto' ? 'border-blue-600/30' : entry.result >= 0 ? 'border-emerald-600/20' : 'border-red-600/20'
+            <div key={entry.id} className={`bg-[#0A0E18] border rounded-xl p-4 ${
+              entry.status === 'aberto' ? 'border-[#06E5D4]/30' : entry.result >= 0 ? 'border-emerald-600/20' : 'border-red-600/20'
             }`}>
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-3">
@@ -126,7 +126,7 @@ export default function TraderJournal() {
                     </div>
                   ) : (
                     <button onClick={() => handleClose(entry.id)}
-                      className="text-xs bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 px-2 py-1 rounded-md border border-blue-600/30 transition-colors">
+                      className="text-xs bg-[#06E5D4]/20 hover:bg-[#06E5D4]/40 text-[#06E5D4] px-2 py-1 rounded-md border border-[#06E5D4]/30 transition-colors">
                       Encerrar
                     </button>
                   )}
@@ -148,35 +148,35 @@ export default function TraderJournal() {
       {/* Add modal */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-6 w-full max-w-md">
+          <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-6 w-full max-w-md">
             <h3 className="text-base font-bold text-white mb-4">Registrar Operação</h3>
             <div className="grid grid-cols-2 gap-3">
               <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})}
-                className="bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white" />
+                className="bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white" />
               <input placeholder="Ticker (VALE3)" value={form.ticker} onChange={e => setForm({...form, ticker: e.target.value.toUpperCase()})}
-                className="bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600" />
+                className="bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600" />
               <select value={form.type} onChange={e => setForm({...form, type: e.target.value})}
-                className="bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white">
+                className="bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white">
                 <option value="compra">Compra</option>
                 <option value="venda">Venda</option>
               </select>
               <input type="number" placeholder="Quantidade" value={form.quantity} onChange={e => setForm({...form, quantity: e.target.value})}
-                className="bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600" />
+                className="bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600" />
               <input type="number" placeholder="Preço (R$)" value={form.price} onChange={e => setForm({...form, price: e.target.value})}
-                className="col-span-2 bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600" />
+                className="col-span-2 bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600" />
               <select value={form.emotion} onChange={e => setForm({...form, emotion: e.target.value})}
-                className="col-span-2 bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white">
+                className="col-span-2 bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white">
                 <option value="confiante">😊 Confiante</option>
                 <option value="neutro">😐 Neutro</option>
                 <option value="ansioso">😰 Ansioso</option>
                 <option value="frustrado">😤 Frustrado</option>
               </select>
               <textarea placeholder="Notas (racional da operação, setup, etc.)" value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
-                className="col-span-2 bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 resize-none h-20" />
+                className="col-span-2 bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 resize-none h-20" />
             </div>
             <div className="flex gap-2 mt-4">
               <Button onClick={handleAdd} className="flex-1 bg-emerald-600 hover:bg-emerald-700">Registrar</Button>
-              <Button variant="outline" onClick={() => setShowAdd(false)} className="flex-1 border-[#1E2D42] text-slate-300">Cancelar</Button>
+              <Button variant="outline" onClick={() => setShowAdd(false)} className="flex-1 border-[#1A2230] text-slate-300">Cancelar</Button>
             </div>
           </div>
         </div>

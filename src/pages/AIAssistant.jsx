@@ -21,14 +21,14 @@ function Message({ msg }) {
   return (
     <div className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
       {msg.role === 'assistant' && (
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shrink-0 mt-0.5">
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#06E5D4] to-[#A855F7] flex items-center justify-center shrink-0 mt-0.5">
           <Brain className="w-3.5 h-3.5 text-white" />
         </div>
       )}
       <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
         msg.role === 'user'
-          ? 'bg-blue-600 text-white rounded-tr-sm'
-          : 'bg-[#0D1426] border border-[#1E2D42] text-slate-200 rounded-tl-sm'
+          ? 'bg-[#06E5D4] text-white rounded-tr-sm'
+          : 'bg-[#0A0E18] border border-[#1A2230] text-slate-200 rounded-tl-sm'
       }`}>
         {msg.role === 'user' ? (
           <p className="text-sm">{msg.content}</p>
@@ -123,9 +123,9 @@ Como posso ajudar você hoje?`,
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#1E2D42] bg-[#0A0E1A] shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A2230] bg-[#070A12] shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#06E5D4] to-[#A855F7] flex items-center justify-center">
             <Brain className="w-4 h-4 text-white" />
           </div>
           <div>
@@ -146,14 +146,14 @@ Como posso ajudar você hoje?`,
         {messages.map((msg, i) => <Message key={i} msg={msg} />)}
         {loading && (
           <div className="flex gap-3">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#06E5D4] to-[#A855F7] flex items-center justify-center shrink-0">
               <Brain className="w-3.5 h-3.5 text-white" />
             </div>
-            <div className="bg-[#0D1426] border border-[#1E2D42] rounded-2xl rounded-tl-sm px-4 py-3">
+            <div className="bg-[#0A0E18] border border-[#1A2230] rounded-2xl rounded-tl-sm px-4 py-3">
               <div className="flex gap-1 items-center h-5">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#06E5D4] animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#06E5D4] animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#06E5D4] animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           </div>
@@ -162,13 +162,13 @@ Como posso ajudar você hoje?`,
       </div>
 
       {/* Quick prompts */}
-      <div className="px-4 py-2 border-t border-[#1E2D42] flex gap-2 overflow-x-auto shrink-0 bg-[#0A0E1A]">
+      <div className="px-4 py-2 border-t border-[#1A2230] flex gap-2 overflow-x-auto shrink-0 bg-[#070A12]">
         {QUICK_PROMPTS.map((q, i) => (
           <button
             key={i}
             onClick={() => sendMessage(q)}
             disabled={loading}
-            className="shrink-0 text-xs bg-[#111827] border border-[#1E2D42] text-slate-400 hover:text-white hover:border-blue-600/50 px-3 py-1.5 rounded-full transition-colors"
+            className="shrink-0 text-xs bg-[#0E141F] border border-[#1A2230] text-slate-400 hover:text-white hover:border-[#06E5D4]/50 px-3 py-1.5 rounded-full transition-colors"
           >
             {q.slice(0, 35)}{q.length > 35 ? '...' : ''}
           </button>
@@ -176,7 +176,7 @@ Como posso ajudar você hoje?`,
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-[#1E2D42] bg-[#0A0E1A] shrink-0">
+      <div className="p-4 border-t border-[#1A2230] bg-[#070A12] shrink-0">
         <div className="flex gap-2 items-end">
           <textarea
             value={input}
@@ -184,13 +184,13 @@ Como posso ajudar você hoje?`,
             onKeyDown={handleKeyDown}
             placeholder="Pergunte sobre qualquer ação, estratégia ou análise..."
             rows={1}
-            className="flex-1 bg-[#111827] border border-[#1E2D42] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600 resize-none max-h-32"
+            className="flex-1 bg-[#0E141F] border border-[#1A2230] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#06E5D4] resize-none max-h-32"
             style={{ minHeight: 44 }}
           />
           <Button
             onClick={() => sendMessage()}
             disabled={loading || !input.trim()}
-            className="bg-blue-600 hover:bg-blue-700 h-11 w-11 p-0 shrink-0"
+            className="bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] h-11 w-11 p-0 shrink-0"
           >
             <Send className="w-4 h-4" />
           </Button>

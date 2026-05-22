@@ -98,7 +98,7 @@ export default function RiskManager() {
             ].map((m) => {
               const Icon = m.icon
               return (
-                <div key={m.label} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+                <div key={m.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
                   <div className="flex items-start justify-between mb-2">
                     <p className="text-xs text-slate-500 font-medium">{m.label}</p>
                     <Icon style={{ color: m.color, width: 16, height: 16 }} />
@@ -112,11 +112,11 @@ export default function RiskManager() {
 
           {/* Risk radar + scenarios */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+            <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
               <h3 className="text-sm font-semibold text-white mb-4">Radar de Risco</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="#1E2D42" />
+                  <PolarGrid stroke="#1A2230" />
                   <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: '#94A3B8' }} />
                   <Radar name="Risco" dataKey="A" stroke="#8B5CF6" fill="#8B5CF6" fillOpacity={0.2} />
                 </RadarChart>
@@ -138,7 +138,7 @@ export default function RiskManager() {
               </div>
             </div>
 
-            <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+            <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
               <h3 className="text-sm font-semibold text-white mb-4">Análise de Cenários</h3>
               <p className="text-xs text-slate-500 mb-3">Impacto estimado no patrimônio de {formatCurrency(capitalValue)}</p>
               <div className="space-y-2">
@@ -157,7 +157,7 @@ export default function RiskManager() {
                           </span>
                         </div>
                       </div>
-                      <div className="h-1.5 bg-[#111827] rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-[#0E141F] rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full"
                           style={{
@@ -174,7 +174,7 @@ export default function RiskManager() {
           </div>
 
           {/* Positions risk breakdown */}
-          <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+          <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
             <h3 className="text-sm font-semibold text-white mb-4">Contribuição ao Risco por Posição</h3>
             <div className="space-y-2">
               {portfolio.map((pos) => {
@@ -188,7 +188,7 @@ export default function RiskManager() {
                         <span className="text-xs text-slate-500">Peso: {pos.weight}% · Beta: {pos.beta}</span>
                         <span className="text-xs font-semibold text-amber-400">Risco: {riskPct.toFixed(1)}%</span>
                       </div>
-                      <div className="h-2 bg-[#111827] rounded-full overflow-hidden">
+                      <div className="h-2 bg-[#0E141F] rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-purple-600 to-amber-500"
                           style={{ width: `${riskPct}%` }}

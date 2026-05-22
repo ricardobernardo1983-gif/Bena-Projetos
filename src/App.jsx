@@ -9,7 +9,6 @@ import Dashboard from './pages/Dashboard'
 import DecisionCockpit from './pages/DecisionCockpit'
 import OpportunityRadar from './pages/OpportunityRadar'
 import MonteCarloSimulator from './pages/MonteCarloSimulator'
-import SmartOpportunities from './pages/SmartOpportunities'
 import MarketScanner from './pages/MarketScanner'
 import Portfolio from './pages/Portfolio'
 import BacktestCenter from './pages/BacktestCenter'
@@ -20,7 +19,6 @@ import SectorMap from './pages/SectorMap'
 import FIICenter from './pages/FIICenter'
 import Watchlist from './pages/Watchlist'
 import AIAssistant from './pages/AIAssistant'
-import NewsHub from './pages/NewsHub'
 import TraderJournal from './pages/TraderJournal'
 import Plans from './pages/Plans'
 import UserProfile from './pages/UserProfile'
@@ -54,7 +52,6 @@ export default function App() {
         <Route path="/cockpit" element={<PageWrapper><DecisionCockpit /></PageWrapper>} />
         <Route path="/radar" element={<PageWrapper><OpportunityRadar /></PageWrapper>} />
         <Route path="/monte-carlo" element={<PageWrapper><MonteCarloSimulator /></PageWrapper>} />
-        <Route path="/smart-opportunities" element={<PageWrapper><SmartOpportunities /></PageWrapper>} />
         <Route path="/market-scanner" element={<PageWrapper><MarketScanner /></PageWrapper>} />
         <Route path="/portfolio" element={<PageWrapper><Portfolio /></PageWrapper>} />
         <Route path="/backtest" element={<PageWrapper><BacktestCenter /></PageWrapper>} />
@@ -65,7 +62,6 @@ export default function App() {
         <Route path="/fiis" element={<PageWrapper><FIICenter /></PageWrapper>} />
         <Route path="/watchlist" element={<PageWrapper><Watchlist /></PageWrapper>} />
         <Route path="/ai-assistant" element={<PageWrapper><AIAssistant /></PageWrapper>} />
-        <Route path="/news" element={<PageWrapper><NewsHub /></PageWrapper>} />
         <Route path="/journal" element={<PageWrapper><TraderJournal /></PageWrapper>} />
         <Route path="/plans" element={<PageWrapper><Plans /></PageWrapper>} />
         <Route path="/profile" element={<PageWrapper><UserProfile /></PageWrapper>} />

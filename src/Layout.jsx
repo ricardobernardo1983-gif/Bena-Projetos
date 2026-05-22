@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Brain, TrendingUp, Shield, Star,
   BarChart3, ChevronLeft, ChevronRight, Bell, LogOut,
-  Crown, Menu, X, Activity, BookOpen, Newspaper, Building2,
+  Crown, Menu, X, Activity, BookOpen, Building2,
   Target, Users, MessageSquare, Settings, Wallet, Zap,
   DollarSign, PieChart, LineChart, FlaskConical, Crosshair,
   Radar, Dices
@@ -19,7 +19,6 @@ const NAV_ITEMS = [
   { label: 'Decision Cockpit', page: '/cockpit', icon: Crosshair, description: 'Tese + plano de trade', flagship: true },
   { label: 'Radar de Oportunidades', page: '/radar', icon: Radar, description: 'Risco × Retorno ao vivo', flagship: true },
   { label: 'Simulador Monte Carlo', page: '/monte-carlo', icon: Dices, description: '5.000 futuros', flagship: true },
-  { label: 'Oportunidades IA', page: '/smart-opportunities', icon: Brain, description: 'Sinais compra/venda' },
   { section: 'MERCADO' },
   { label: 'Scanner de Mercado', page: '/market-scanner', icon: Zap, description: 'Varredura B3' },
   { label: 'Mapa Setorial', page: '/sector-map', icon: Target, description: 'Heat map B3' },
@@ -34,7 +33,6 @@ const NAV_ITEMS = [
   { label: 'Diário do Trader', page: '/journal', icon: BookOpen, description: 'Registro de operações' },
   { section: 'OUTROS' },
   { label: 'Assistente IA', page: '/ai-assistant', icon: MessageSquare, description: 'Chat inteligente' },
-  { label: 'Notícias & Eventos', page: '/news', icon: Newspaper, description: 'Mercado e macro' },
 ]
 
 const BOTTOM_ITEMS = [

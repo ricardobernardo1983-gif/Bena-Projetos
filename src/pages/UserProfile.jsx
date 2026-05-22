@@ -43,7 +43,7 @@ export default function UserProfile() {
       <h1 className="text-2xl font-bold text-white">Meu Perfil</h1>
 
       {/* User card */}
-      <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-5 flex items-center gap-4">
+      <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-5 flex items-center gap-4">
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
           <span className="text-2xl font-bold text-white">
             {(profile.full_name || user?.email || 'U').charAt(0).toUpperCase()}
@@ -60,13 +60,13 @@ export default function UserProfile() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-[#1E2D42]">
+      <div className="flex gap-1 border-b border-[#1A2230]">
         {TABS.map(tab => {
           const Icon = tab.icon
           return (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-300'
+                activeTab === tab.id ? 'border-blue-500 text-[#06E5D4]' : 'border-transparent text-slate-500 hover:text-slate-300'
               }`}>
               <Icon className="w-3.5 h-3.5" />
               {tab.label}
@@ -80,12 +80,12 @@ export default function UserProfile() {
           <div>
             <label className="text-xs text-slate-400 font-medium mb-1.5 block">Nome Completo</label>
             <input value={profile.full_name} onChange={e => setProfile({...profile, full_name: e.target.value})}
-              className="w-full bg-[#0D1426] border border-[#1E2D42] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-600" />
+              className="w-full bg-[#0A0E18] border border-[#1A2230] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#06E5D4]" />
           </div>
           <div>
             <label className="text-xs text-slate-400 font-medium mb-1.5 block">Email</label>
             <input value={user?.email || ''} disabled
-              className="w-full bg-[#0D1426] border border-[#1E2D42] rounded-lg px-3 py-2.5 text-sm text-slate-500 cursor-not-allowed" />
+              className="w-full bg-[#0A0E18] border border-[#1A2230] rounded-lg px-3 py-2.5 text-sm text-slate-500 cursor-not-allowed" />
           </div>
           <div>
             <label className="text-xs text-slate-400 font-medium mb-1.5 block">Perfil de Risco</label>
@@ -97,7 +97,7 @@ export default function UserProfile() {
               ].map(r => (
                 <button key={r.value} onClick={() => setProfile({...profile, risk_profile: r.value})}
                   className={`p-3 rounded-xl border text-left transition-colors ${
-                    profile.risk_profile === r.value ? 'bg-blue-600/15 border-blue-600/50 text-blue-400' : 'bg-[#111827] border-[#1E2D42] text-slate-400'
+                    profile.risk_profile === r.value ? 'bg-[#06E5D4]/15 border-[#06E5D4]/50 text-[#06E5D4]' : 'bg-[#0E141F] border-[#1A2230] text-slate-400'
                   }`}>
                   <p className="text-sm font-semibold">{r.label}</p>
                   <p className="text-[10px] mt-0.5 opacity-70">{r.desc}</p>
@@ -105,7 +105,7 @@ export default function UserProfile() {
               ))}
             </div>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="w-full bg-blue-600 hover:bg-blue-700 gap-2">
+          <Button onClick={handleSave} disabled={saving} className="w-full bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] gap-2">
             {saving ? <><Check className="w-4 h-4" /> Salvo!</> : <><Save className="w-4 h-4" /> Salvar Perfil</>}
           </Button>
         </div>
@@ -113,7 +113,7 @@ export default function UserProfile() {
 
       {activeTab === 'preferences' && (
         <div className="space-y-4">
-          <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+          <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
             <h3 className="text-sm font-semibold text-white mb-3">Preferências de Análise</h3>
             <div className="space-y-3">
               {[
@@ -125,7 +125,7 @@ export default function UserProfile() {
               ].map(pref => (
                 <div key={pref.label} className="flex items-center justify-between">
                   <span className="text-sm text-slate-300">{pref.label}</span>
-                  <div className={`w-10 h-5 rounded-full cursor-pointer transition-colors ${pref.checked ? 'bg-blue-600' : 'bg-[#1E2D42]'}`}
+                  <div className={`w-10 h-5 rounded-full cursor-pointer transition-colors ${pref.checked ? 'bg-[#06E5D4]' : 'bg-[#1A2230]'}`}
                     onClick={() => {}}>
                     <div className={`w-4 h-4 rounded-full bg-white m-0.5 transition-transform ${pref.checked ? 'translate-x-5' : 'translate-x-0'}`} />
                   </div>
@@ -137,7 +137,7 @@ export default function UserProfile() {
       )}
 
       {activeTab === 'notifications' && (
-        <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+        <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
           <h3 className="text-sm font-semibold text-white mb-3">Configurações de Alertas</h3>
           <div className="space-y-3">
             {[
@@ -152,7 +152,7 @@ export default function UserProfile() {
                   <p className="text-sm text-white">{n.label}</p>
                   <p className="text-xs text-slate-500">{n.desc}</p>
                 </div>
-                <div className="w-10 h-5 rounded-full bg-blue-600 cursor-pointer shrink-0 mt-0.5">
+                <div className="w-10 h-5 rounded-full bg-[#06E5D4] cursor-pointer shrink-0 mt-0.5">
                   <div className="w-4 h-4 rounded-full bg-white m-0.5 translate-x-5" />
                 </div>
               </div>
@@ -163,7 +163,7 @@ export default function UserProfile() {
 
       {activeTab === 'security' && (
         <div className="space-y-4">
-          <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+          <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
               <Key className="w-4 h-4 text-amber-400" />
               Chaves de API Configuradas
@@ -174,7 +174,7 @@ export default function UserProfile() {
               { name: 'Brapi.dev', env: 'VITE_BRAPI_TOKEN', configured: !!import.meta.env.VITE_BRAPI_TOKEN },
               { name: 'Stripe', env: 'VITE_STRIPE_PUBLISHABLE_KEY', configured: !!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY },
             ].map(api => (
-              <div key={api.name} className="flex items-center justify-between py-2 border-b border-[#1E2D42]/50">
+              <div key={api.name} className="flex items-center justify-between py-2 border-b border-[#1A2230]/50">
                 <div>
                   <p className="text-sm text-white">{api.name}</p>
                   <p className="text-[10px] text-slate-600 font-mono">{api.env}</p>

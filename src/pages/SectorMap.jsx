@@ -65,7 +65,7 @@ export default function SectorMap() {
           {['heatmap', 'sector'].map(m => (
             <button key={m} onClick={() => setViewMode(m)}
               className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
-                viewMode === m ? 'bg-blue-600 text-white border-blue-600' : 'bg-[#0D1426] text-slate-400 border-[#1E2D42]'
+                viewMode === m ? 'bg-[#06E5D4] text-white border-[#06E5D4]' : 'bg-[#0A0E18] text-slate-400 border-[#1A2230]'
               }`}>
               {m === 'heatmap' ? 'Heat Map' : 'Por Setor'}
             </button>
@@ -76,7 +76,7 @@ export default function SectorMap() {
       {/* Sector overview bar */}
       <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-11 gap-2">
         {sectorStats.map(s => (
-          <div key={s.sector} className={`bg-[#0D1426] border border-[#1E2D42] rounded-lg p-2 text-center ${
+          <div key={s.sector} className={`bg-[#0A0E18] border border-[#1A2230] rounded-lg p-2 text-center ${
             s.avgChange >= 1 ? 'border-emerald-500/30' : s.avgChange <= -1 ? 'border-red-500/30' : ''
           }`}>
             <p className="text-[9px] text-slate-500 truncate">{s.sector.split(' ')[0]}</p>
@@ -89,7 +89,7 @@ export default function SectorMap() {
 
       {viewMode === 'heatmap' ? (
         /* Full heat map grid */
-        <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+        <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-1.5">
             {stocks.map(stock => (
               <HeatCell key={stock.ticker} stock={stock} onClick={setSelected} />
@@ -100,7 +100,7 @@ export default function SectorMap() {
         /* By sector */
         <div className="space-y-4">
           {sectorStats.map(s => (
-            <div key={s.sector} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+            <div key={s.sector} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-3 h-3 rounded-full" style={{ background: SECTOR_COLORS[s.sector] || '#3B82F6' }} />
                 <h3 className="text-sm font-semibold text-white">{s.sector}</h3>
@@ -120,7 +120,7 @@ export default function SectorMap() {
 
       {/* Selected stock detail */}
       {selected && (
-        <div className="fixed bottom-6 right-6 w-72 bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4 shadow-2xl z-40">
+        <div className="fixed bottom-6 right-6 w-72 bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4 shadow-2xl z-40">
           <div className="flex items-start justify-between mb-3">
             <div>
               <h3 className="text-base font-bold text-white">{selected.ticker}</h3>
@@ -130,21 +130,21 @@ export default function SectorMap() {
             <button onClick={() => setSelected(null)} className="text-slate-600 hover:text-white text-lg">&times;</button>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-[#111827] rounded-lg p-2">
+            <div className="bg-[#0E141F] rounded-lg p-2">
               <p className="text-[10px] text-slate-500">Preço</p>
               <p className="text-sm font-bold text-white">R$ {selected.price?.toFixed(2)}</p>
             </div>
-            <div className="bg-[#111827] rounded-lg p-2">
+            <div className="bg-[#0E141F] rounded-lg p-2">
               <p className="text-[10px] text-slate-500">Variação</p>
               <p className={`text-sm font-bold ${getChangeColor(selected.changePercent)}`}>
                 {formatPercent(selected.changePercent)}
               </p>
             </div>
-            <div className="bg-[#111827] rounded-lg p-2">
+            <div className="bg-[#0E141F] rounded-lg p-2">
               <p className="text-[10px] text-slate-500">Volume</p>
               <p className="text-xs font-semibold text-white">{(selected.volume / 1e6).toFixed(1)}M</p>
             </div>
-            <div className="bg-[#111827] rounded-lg p-2">
+            <div className="bg-[#0E141F] rounded-lg p-2">
               <p className="text-[10px] text-slate-500">P/L</p>
               <p className="text-xs font-semibold text-white">{selected.pe?.toFixed(1) || '—'}</p>
             </div>

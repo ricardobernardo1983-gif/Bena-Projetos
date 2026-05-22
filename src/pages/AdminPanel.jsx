@@ -47,7 +47,7 @@ export default function AdminPanel() {
         ].map(m => {
           const Icon = m.icon
           return (
-            <div key={m.label} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+            <div key={m.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
               <div className="flex items-start justify-between mb-2">
                 <p className="text-xs text-slate-500 uppercase">{m.label}</p>
                 <Icon style={{ color: m.color, width: 16, height: 16 }} />
@@ -59,7 +59,7 @@ export default function AdminPanel() {
       </div>
 
       {/* MRR Chart */}
-      <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+      <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
         <h3 className="text-sm font-semibold text-white mb-4">MRR — Monthly Recurring Revenue</h3>
         <ResponsiveContainer width="100%" height={160}>
           <AreaChart data={MRR_DATA}>
@@ -71,7 +71,7 @@ export default function AdminPanel() {
             </defs>
             <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 10, fill: '#475569' }} axisLine={false} tickLine={false} tickFormatter={v => `R$${v}`} width={50} />
-            <Tooltip contentStyle={{ background: '#0D1426', border: '1px solid #1E2D42', borderRadius: 8 }}
+            <Tooltip contentStyle={{ background: '#0A0E18', border: '1px solid #1A2230', borderRadius: 8 }}
               formatter={v => [formatCurrency(v), 'MRR']} />
             <Area type="monotone" dataKey="mrr" stroke="#F59E0B" strokeWidth={2} fill="url(#mrrGrad)" dot />
           </AreaChart>
@@ -79,14 +79,14 @@ export default function AdminPanel() {
       </div>
 
       {/* Users table */}
-      <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-[#1E2D42]">
+      <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-[#1A2230]">
           <h3 className="text-sm font-semibold text-white">Usuários</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1E2D42] text-[11px] text-slate-500 uppercase">
+              <tr className="border-b border-[#1A2230] text-[11px] text-slate-500 uppercase">
                 <th className="text-left px-4 py-2.5">Usuário</th>
                 <th className="text-left px-4 py-2.5">Email</th>
                 <th className="text-center px-4 py-2.5">Plano</th>
@@ -95,9 +95,9 @@ export default function AdminPanel() {
                 <th className="text-right px-4 py-2.5">Receita/mês</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E2D42]/50">
+            <tbody className="divide-y divide-[#1A2230]/50">
               {MOCK_USERS.map(user => (
-                <tr key={user.id} className="hover:bg-[#111827]">
+                <tr key={user.id} className="hover:bg-[#0E141F]">
                   <td className="px-4 py-3 font-medium text-white">{user.name}</td>
                   <td className="px-4 py-3 text-slate-400 text-xs">{user.email}</td>
                   <td className="px-4 py-3 text-center">

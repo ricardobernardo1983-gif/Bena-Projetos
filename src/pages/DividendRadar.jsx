@@ -66,7 +66,7 @@ export default function DividendRadar() {
           { label: 'Próxima Ex-Data', value: DIVIDEND_CALENDAR[0].ticker, sub: DIVIDEND_CALENDAR[0].exDate, color: '#3B82F6' },
           { label: 'Próx. Provento', value: `R$ ${DIVIDEND_CALENDAR[0].value.toFixed(2)}`, sub: `DY ${DIVIDEND_CALENDAR[0].yield.toFixed(2)}%`, color: '#8B5CF6' },
         ].map(card => (
-          <div key={card.label} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+          <div key={card.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
             <p className="text-xs text-slate-500 uppercase font-medium">{card.label}</p>
             <p className="text-2xl font-bold mt-1 tabular-nums" style={{ color: card.color }}>{card.value}</p>
             <p className="text-xs text-slate-500">{card.sub}</p>
@@ -76,7 +76,7 @@ export default function DividendRadar() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top DY Chart */}
-        <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+        <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
           <h3 className="text-sm font-semibold text-white mb-4">Top 10 Dividend Yield</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={topYields} layout="vertical">
@@ -84,7 +84,7 @@ export default function DividendRadar() {
                 tickFormatter={(v) => `${v.toFixed(1)}%`} />
               <YAxis type="category" dataKey="ticker" tick={{ fontSize: 11, fill: '#94A3B8' }} axisLine={false} tickLine={false} width={50} />
               <Tooltip
-                contentStyle={{ background: '#0D1426', border: '1px solid #1E2D42', borderRadius: 8 }}
+                contentStyle={{ background: '#0A0E18', border: '1px solid #1A2230', borderRadius: 8 }}
                 formatter={(v) => [`${v.toFixed(2)}%`, 'Dividend Yield']}
               />
               <Bar dataKey="dividendYield" radius={[0, 4, 4, 0]}>
@@ -97,14 +97,14 @@ export default function DividendRadar() {
         </div>
 
         {/* Dividend Calendar */}
-        <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+        <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-4 h-4 text-blue-400" />
+            <Calendar className="w-4 h-4 text-[#06E5D4]" />
             <h3 className="text-sm font-semibold text-white">Próximas Ex-Datas</h3>
           </div>
           <div className="space-y-2">
             {DIVIDEND_CALENDAR.map((div, i) => (
-              <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg bg-[#111827]">
+              <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg bg-[#0E141F]">
                 <div className="text-center min-w-[40px]">
                   <p className="text-[10px] text-slate-500">Ex-Data</p>
                   <p className="text-xs font-bold text-white">{div.exDate.slice(5)}</p>
@@ -129,15 +129,15 @@ export default function DividendRadar() {
       </div>
 
       {/* Stock list */}
-      <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-[#1E2D42] flex items-center gap-3 flex-wrap">
+      <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-[#1A2230] flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar ativo..."
-              className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-600"
+              className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-600"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -146,7 +146,7 @@ export default function DividendRadar() {
               <button
                 key={v}
                 onClick={() => setMinYield(v)}
-                className={`text-xs px-2 py-1 rounded-md ${minYield === v ? 'bg-amber-600 text-white' : 'bg-[#111827] text-slate-400 border border-[#1E2D42]'}`}
+                className={`text-xs px-2 py-1 rounded-md ${minYield === v ? 'bg-amber-600 text-white' : 'bg-[#0E141F] text-slate-400 border border-[#1A2230]'}`}
               >
                 {v === 0 ? 'Todos' : `${v}%+`}
               </button>
@@ -155,7 +155,7 @@ export default function DividendRadar() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="text-xs bg-[#111827] border border-[#1E2D42] text-slate-300 rounded-md px-2 py-1"
+            className="text-xs bg-[#0E141F] border border-[#1A2230] text-slate-300 rounded-md px-2 py-1"
           >
             <option value="dy">Ordenar: DY</option>
             <option value="price">Ordenar: Preço</option>
@@ -166,7 +166,7 @@ export default function DividendRadar() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1E2D42] text-[11px] text-slate-500 uppercase">
+              <tr className="border-b border-[#1A2230] text-[11px] text-slate-500 uppercase">
                 <th className="text-left px-4 py-2.5">Ativo</th>
                 <th className="text-right px-4 py-2.5">Preço</th>
                 <th className="text-right px-4 py-2.5">DY 12M</th>
@@ -176,9 +176,9 @@ export default function DividendRadar() {
                 <th className="text-right px-4 py-2.5">Setor</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E2D42]/50">
+            <tbody className="divide-y divide-[#1A2230]/50">
               {filtered.slice(0, 20).map((stock) => (
-                <tr key={stock.ticker} className="hover:bg-[#111827] transition-colors">
+                <tr key={stock.ticker} className="hover:bg-[#0E141F] transition-colors">
                   <td className="px-4 py-3">
                     <p className="font-bold text-white">{stock.ticker}</p>
                     <p className="text-[10px] text-slate-500 truncate max-w-[120px]">{stock.name}</p>

@@ -97,7 +97,7 @@ export default function Watchlist() {
           </h1>
           <p className="text-slate-400 text-sm">{watchlist.length} ativos monitorados · {alerts.length} alertas ativos</p>
         </div>
-        <Button onClick={() => setShowAdd(true)} size="sm" className="bg-blue-600 hover:bg-blue-700 gap-2">
+        <Button onClick={() => setShowAdd(true)} size="sm" className="bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] gap-2">
           <Plus className="w-4 h-4" /> Adicionar Ativo
         </Button>
       </div>
@@ -105,7 +105,7 @@ export default function Watchlist() {
       {/* Watchlist */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         {stocks.map(stock => (
-          <div key={stock.ticker} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4 hover:border-[#2E3D52] transition-all">
+          <div key={stock.ticker} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4 hover:border-[#232E40] transition-all">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
                 <NexusScoreBadge score={stock.nexusScore.score} size="sm" showLabel={false} />
@@ -142,7 +142,7 @@ export default function Watchlist() {
                 { l: 'DY', v: `${stock.dividendYield?.toFixed(1) || '0'}%` },
                 { l: 'RSI', v: stock.nexusScore.technical?.rsi?.toFixed(0) || '—' },
               ].map(m => (
-                <div key={m.l} className="bg-[#111827] rounded-lg p-1.5 text-center">
+                <div key={m.l} className="bg-[#0E141F] rounded-lg p-1.5 text-center">
                   <p className="text-[9px] text-slate-500">{m.l}</p>
                   <p className="text-xs font-bold text-white tabular-nums">{m.v}</p>
                 </div>
@@ -183,14 +183,14 @@ export default function Watchlist() {
 
       {/* Active alerts */}
       {alerts.length > 0 && (
-        <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+        <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
           <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
             <Bell className="w-4 h-4 text-amber-400" />
             Alertas Configurados ({alerts.length})
           </h3>
           <div className="space-y-2">
             {alerts.map(alert => (
-              <div key={alert.id} className="flex items-center justify-between p-2.5 bg-[#111827] rounded-lg">
+              <div key={alert.id} className="flex items-center justify-between p-2.5 bg-[#0E141F] rounded-lg">
                 <div>
                   <span className="text-sm font-bold text-white mr-2">{alert.ticker}</span>
                   <span className="text-xs text-slate-400">
@@ -211,22 +211,22 @@ export default function Watchlist() {
       {/* Add to watchlist modal */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-6 w-full max-w-sm">
+          <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-6 w-full max-w-sm">
             <h3 className="text-base font-bold text-white mb-4">Adicionar à Watchlist</h3>
             <div className="relative mb-2">
               <input
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setNewTicker(e.target.value) }}
                 placeholder="Ticker ou nome da empresa..."
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600"
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600"
                 autoFocus
               />
             </div>
             {suggestions.length > 0 && (
-              <div className="bg-[#111827] border border-[#1E2D42] rounded-lg overflow-hidden mb-3">
+              <div className="bg-[#0E141F] border border-[#1A2230] rounded-lg overflow-hidden mb-3">
                 {suggestions.map(s => (
                   <button key={s.ticker} onClick={() => { setNewTicker(s.ticker); setSearch(s.ticker) }}
-                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#1A2535] transition-colors text-left">
+                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#131B28] transition-colors text-left">
                     <span className="text-sm font-bold text-white">{s.ticker}</span>
                     <span className="text-xs text-slate-500 truncate ml-2">{s.name}</span>
                   </button>
@@ -234,8 +234,8 @@ export default function Watchlist() {
               </div>
             )}
             <div className="flex gap-2">
-              <Button onClick={handleAdd} className="flex-1 bg-blue-600 hover:bg-blue-700 text-sm">Adicionar</Button>
-              <Button variant="outline" onClick={() => setShowAdd(false)} className="flex-1 border-[#1E2D42] text-slate-300 text-sm">Cancelar</Button>
+              <Button onClick={handleAdd} className="flex-1 bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] text-sm">Adicionar</Button>
+              <Button variant="outline" onClick={() => setShowAdd(false)} className="flex-1 border-[#1A2230] text-slate-300 text-sm">Cancelar</Button>
             </div>
           </div>
         </div>
@@ -244,11 +244,11 @@ export default function Watchlist() {
       {/* Alert modal */}
       {showAlert && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-6 w-full max-w-sm">
+          <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-6 w-full max-w-sm">
             <h3 className="text-base font-bold text-white mb-4">Criar Alerta — {showAlert}</h3>
             <div className="space-y-3">
               <select value={alertForm.type} onChange={e => setAlertForm({...alertForm, type: e.target.value})}
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white">
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white">
                 <option value="price_above">Preço acima de</option>
                 <option value="price_below">Preço abaixo de</option>
                 <option value="change_up">Variação positiva de</option>
@@ -256,13 +256,13 @@ export default function Watchlist() {
               </select>
               <input type="number" placeholder={alertForm.type.includes('change') ? 'Ex: 5 (%)' : 'Ex: 70.50 (R$)'}
                 value={alertForm.value} onChange={e => setAlertForm({...alertForm, value: e.target.value})}
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600" />
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600" />
             </div>
             <div className="flex gap-2 mt-4">
               <Button onClick={handleSaveAlert} className="flex-1 bg-amber-600 hover:bg-amber-700 text-sm gap-2">
                 <Bell className="w-4 h-4" /> Criar Alerta
               </Button>
-              <Button variant="outline" onClick={() => setShowAlert(null)} className="flex-1 border-[#1E2D42] text-slate-300 text-sm">Cancelar</Button>
+              <Button variant="outline" onClick={() => setShowAlert(null)} className="flex-1 border-[#1A2230] text-slate-300 text-sm">Cancelar</Button>
             </div>
           </div>
         </div>

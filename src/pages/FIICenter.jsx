@@ -65,7 +65,7 @@ export default function FIICenter() {
           { label: 'Maior DY', value: `${bestDY.toFixed(2)}%`, sub: filtered[0]?.ticker || '—', color: '#10B981' },
           { label: 'P/VP Médio', value: fiis.length ? (fiis.reduce((s,f) => s + f.pvp, 0) / fiis.length).toFixed(2) : '—', sub: '<1 = desconto', color: '#8B5CF6' },
         ].map(card => (
-          <div key={card.label} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+          <div key={card.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
             <p className="text-xs text-slate-500 uppercase font-medium">{card.label}</p>
             <p className="text-2xl font-bold mt-1 tabular-nums" style={{ color: card.color }}>{card.value}</p>
             <p className="text-xs text-slate-500">{card.sub}</p>
@@ -74,14 +74,14 @@ export default function FIICenter() {
       </div>
 
       {/* DY Chart */}
-      <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+      <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
         <h3 className="text-sm font-semibold text-white mb-3">Dividend Yield por FII</h3>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={fiis.slice().sort((a,b) => b.dividendYield - a.dividendYield)}>
             <XAxis dataKey="ticker" tick={{ fontSize: 10, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 10, fill: '#475569' }} axisLine={false} tickLine={false} tickFormatter={v => `${v.toFixed(0)}%`} width={30} />
             <Tooltip
-              contentStyle={{ background: '#0D1426', border: '1px solid #1E2D42', borderRadius: 8 }}
+              contentStyle={{ background: '#0A0E18', border: '1px solid #1A2230', borderRadius: 8 }}
               formatter={v => [`${v.toFixed(2)}%`, 'DY']}
             />
             <Bar dataKey="dividendYield" radius={[4, 4, 0, 0]}>
@@ -92,25 +92,25 @@ export default function FIICenter() {
       </div>
 
       {/* Controls + Table */}
-      <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-[#1E2D42] flex items-center gap-3 flex-wrap">
+      <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-[#1A2230] flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-[180px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar FII..."
-              className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-600" />
+              className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-600" />
           </div>
           <div className="flex gap-1 flex-wrap">
             {FII_TYPES.map(t => (
               <button key={t} onClick={() => setTypeFilter(t)}
                 className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${
-                  typeFilter === t ? 'bg-cyan-600 text-white border-cyan-600' : 'bg-[#111827] text-slate-400 border-[#1E2D42]'
+                  typeFilter === t ? 'bg-cyan-600 text-white border-cyan-600' : 'bg-[#0E141F] text-slate-400 border-[#1A2230]'
                 }`}>
                 {t}
               </button>
             ))}
           </div>
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-            className="text-xs bg-[#111827] border border-[#1E2D42] text-slate-300 rounded-md px-2 py-1">
+            className="text-xs bg-[#0E141F] border border-[#1A2230] text-slate-300 rounded-md px-2 py-1">
             <option value="dy">Maior DY</option>
             <option value="pvp">Menor P/VP</option>
             <option value="liquidez">Maior Liquidez</option>
@@ -120,7 +120,7 @@ export default function FIICenter() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1E2D42] text-[11px] text-slate-500 uppercase">
+              <tr className="border-b border-[#1A2230] text-[11px] text-slate-500 uppercase">
                 <th className="text-left px-4 py-2.5">FII</th>
                 <th className="text-left px-4 py-2.5">Tipo</th>
                 <th className="text-right px-4 py-2.5">Cota</th>
@@ -132,9 +132,9 @@ export default function FIICenter() {
                 <th className="text-right px-4 py-2.5">Liquidez</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E2D42]/50">
+            <tbody className="divide-y divide-[#1A2230]/50">
               {filtered.map(fii => (
-                <tr key={fii.ticker} className="hover:bg-[#111827] transition-colors">
+                <tr key={fii.ticker} className="hover:bg-[#0E141F] transition-colors">
                   <td className="px-4 py-3">
                     <p className="font-bold text-white">{fii.ticker}</p>
                     <p className="text-[10px] text-slate-500 max-w-[140px] truncate">{fii.name}</p>

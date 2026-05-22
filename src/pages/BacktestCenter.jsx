@@ -209,7 +209,7 @@ export default function BacktestCenter() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Config panel */}
-        <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-5">
+        <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-5">
           <h3 className="text-sm font-semibold text-white mb-4">Configuração da Estratégia</h3>
           <div className="space-y-3">
             <div>
@@ -217,7 +217,7 @@ export default function BacktestCenter() {
               <select
                 value={config.ticker}
                 onChange={(e) => setConfig({ ...config, ticker: e.target.value })}
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white"
               >
                 {B3_TICKERS.map((t) => <option key={t}>{t}</option>)}
               </select>
@@ -230,7 +230,7 @@ export default function BacktestCenter() {
                     key={p}
                     onClick={() => setConfig({ ...config, period: p })}
                     className={`text-xs py-1.5 rounded-md font-medium transition-colors ${
-                      config.period === p ? 'bg-blue-600 text-white' : 'bg-[#111827] text-slate-400 border border-[#1E2D42]'
+                      config.period === p ? 'bg-[#06E5D4] text-white' : 'bg-[#0E141F] text-slate-400 border border-[#1A2230]'
                     }`}
                   >
                     {p}
@@ -243,7 +243,7 @@ export default function BacktestCenter() {
               <select
                 value={config.entrySignal}
                 onChange={(e) => setConfig({ ...config, entrySignal: e.target.value })}
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white"
               >
                 {INDICATORS.filter(i => !i.label.includes('Saída')).map((ind) => (
                   <option key={ind.value} value={ind.value}>{ind.label}</option>
@@ -255,7 +255,7 @@ export default function BacktestCenter() {
               <select
                 value={config.exitSignal}
                 onChange={(e) => setConfig({ ...config, exitSignal: e.target.value })}
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white"
               >
                 {INDICATORS.filter(i => i.label.includes('Saída')).map((ind) => (
                   <option key={ind.value} value={ind.value}>{ind.label}</option>
@@ -269,7 +269,7 @@ export default function BacktestCenter() {
                   type="number"
                   value={config.stopLoss}
                   onChange={(e) => setConfig({ ...config, stopLoss: Number(e.target.value) })}
-                  className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white"
+                  className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white"
                   min={0} max={50}
                 />
               </div>
@@ -279,7 +279,7 @@ export default function BacktestCenter() {
                   type="number"
                   value={config.takeProfit}
                   onChange={(e) => setConfig({ ...config, takeProfit: Number(e.target.value) })}
-                  className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white"
+                  className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white"
                   min={0} max={100}
                 />
               </div>
@@ -295,7 +295,7 @@ export default function BacktestCenter() {
         {/* Results */}
         <div className="lg:col-span-2 space-y-4">
           {!results && !running && (
-            <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-12 text-center">
+            <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-12 text-center">
               <FlaskConical className="w-12 h-12 text-slate-700 mx-auto mb-3" />
               <p className="text-slate-500 text-sm">Configure sua estratégia e clique em "Rodar Backtest"</p>
               <p className="text-slate-600 text-xs mt-1">Dados simulados baseados em padrões históricos reais da B3</p>
@@ -303,7 +303,7 @@ export default function BacktestCenter() {
           )}
 
           {running && (
-            <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-12 text-center">
+            <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-12 text-center">
               <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
               <p className="text-slate-400 text-sm">Processando dados históricos...</p>
             </div>
@@ -323,7 +323,7 @@ export default function BacktestCenter() {
                   { label: 'Ganho Médio', value: formatPercent(results.avgWin), color: '#10B981' },
                   { label: 'Perda Média', value: formatPercent(results.avgLoss), color: '#EF4444' },
                 ].map((m) => (
-                  <div key={m.label} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-3">
+                  <div key={m.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-3">
                     <p className="text-[10px] text-slate-500 uppercase font-medium">{m.label}</p>
                     <p className="text-lg font-bold tabular-nums mt-0.5" style={{ color: m.color || '#F1F5F9' }}>{m.value}</p>
                     {m.sub && <p className="text-[10px] text-slate-600">{m.sub}</p>}
@@ -332,12 +332,12 @@ export default function BacktestCenter() {
               </div>
 
               {/* Equity curve */}
-              <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+              <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-white">Curva de Capital</h3>
                   <Button size="sm" variant="outline" onClick={handleAIInterpret} disabled={loadingAI}
-                    className="border-[#1E2D42] text-slate-300 gap-1.5 text-xs">
-                    <Brain className="w-3.5 h-3.5 text-blue-400" />
+                    className="border-[#1A2230] text-slate-300 gap-1.5 text-xs">
+                    <Brain className="w-3.5 h-3.5 text-[#06E5D4]" />
                     {loadingAI ? 'Analisando...' : 'Interpretar com IA'}
                   </Button>
                 </div>
@@ -353,7 +353,7 @@ export default function BacktestCenter() {
                     <YAxis tick={{ fontSize: 10, fill: '#475569' }} axisLine={false} tickLine={false}
                       tickFormatter={(v) => `R$${(v/1000).toFixed(0)}K`} width={42} />
                     <Tooltip
-                      contentStyle={{ background: '#0D1426', border: '1px solid #1E2D42', borderRadius: 8 }}
+                      contentStyle={{ background: '#0A0E18', border: '1px solid #1A2230', borderRadius: 8 }}
                       formatter={(v) => [formatCurrency(v), 'Capital']}
                     />
                     <ReferenceLine y={10000} stroke="#475569" strokeDasharray="4 4" />
@@ -365,14 +365,14 @@ export default function BacktestCenter() {
 
               {/* Trades list */}
               {results.trades.length > 0 && (
-                <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl overflow-hidden">
-                  <div className="p-4 border-b border-[#1E2D42]">
+                <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl overflow-hidden">
+                  <div className="p-4 border-b border-[#1A2230]">
                     <h3 className="text-sm font-semibold text-white">Operações ({results.trades.length})</h3>
                   </div>
                   <div className="overflow-auto max-h-48">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-[10px] text-slate-500 border-b border-[#1E2D42] uppercase">
+                        <tr className="text-[10px] text-slate-500 border-b border-[#1A2230] uppercase">
                           <th className="text-left px-4 py-2">Entrada</th>
                           <th className="text-left px-4 py-2">Saída</th>
                           <th className="text-right px-4 py-2">Entrada R$</th>
@@ -380,9 +380,9 @@ export default function BacktestCenter() {
                           <th className="text-right px-4 py-2">Resultado</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#1E2D42]/40">
+                      <tbody className="divide-y divide-[#1A2230]/40">
                         {results.trades.map((t, i) => (
-                          <tr key={i} className="hover:bg-[#111827]">
+                          <tr key={i} className="hover:bg-[#0E141F]">
                             <td className="px-4 py-1.5 text-slate-400">{t.entryDate}</td>
                             <td className="px-4 py-1.5 text-slate-400">{t.exitDate}</td>
                             <td className="px-4 py-1.5 text-right text-white tabular-nums">{t.entryPrice.toFixed(2)}</td>
@@ -400,9 +400,9 @@ export default function BacktestCenter() {
 
               {/* AI interpretation */}
               {aiInterp && (
-                <div className="bg-[#0D1426] border border-blue-600/30 rounded-xl p-4">
+                <div className="bg-[#0A0E18] border border-[#06E5D4]/30 rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <Brain className="w-4 h-4 text-blue-400" />
+                    <Brain className="w-4 h-4 text-[#06E5D4]" />
                     <h3 className="text-sm font-semibold text-white">Interpretação NEXUS IA</h3>
                   </div>
                   <div className="text-sm text-slate-300 leading-relaxed prose prose-invert prose-sm max-w-none">

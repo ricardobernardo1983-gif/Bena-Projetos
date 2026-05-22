@@ -79,11 +79,11 @@ export default function Onboarding() {
 
   if (mode !== 'landing') {
     return (
-      <div className="min-h-screen bg-[#070B14] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#05070D] terminal-grid flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#06E5D4] to-[#0891B2] flex items-center justify-center">
                 <LineChart className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-white">NEXUS B3</span>
@@ -97,7 +97,7 @@ export default function Onboarding() {
           </div>
 
           <form onSubmit={mode === 'login' ? handleLogin : handleSignUp}
-            className="bg-[#0D1426] border border-[#1E2D42] rounded-2xl p-6 space-y-4">
+            className="bg-[#0A0E18] border border-[#1A2230] rounded-2xl p-6 space-y-4">
             {mode === 'signup' && (
               <div>
                 <label className="text-xs text-slate-400 font-medium mb-1.5 block">Seu nome</label>
@@ -106,7 +106,7 @@ export default function Onboarding() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="João Silva"
-                  className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600 transition-colors"
+                  className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#06E5D4]/50 transition-colors"
                   required
                 />
               </div>
@@ -118,7 +118,7 @@ export default function Onboarding() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="voce@email.com"
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600 transition-colors"
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#06E5D4]/50 transition-colors"
                 required
               />
             </div>
@@ -130,7 +130,7 @@ export default function Onboarding() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2.5 pr-10 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600 transition-colors"
+                  className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2.5 pr-10 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#06E5D4]/50 transition-colors"
                   required
                   minLength={6}
                 />
@@ -143,7 +143,7 @@ export default function Onboarding() {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+            <Button type="submit" className="w-full bg-[#06E5D4] hover:bg-[#05c4b6] text-[#05070D] font-semibold" disabled={loading}>
               {loading ? 'Carregando...' : mode === 'login' ? 'Entrar' : 'Criar Conta'}
             </Button>
 
@@ -151,7 +151,7 @@ export default function Onboarding() {
               <button
                 type="button"
                 onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-                className="text-xs text-slate-400 hover:text-blue-400 transition-colors"
+                className="text-xs text-slate-400 hover:text-[#06E5D4] transition-colors"
               >
                 {mode === 'login' ? 'Não tem conta? Criar agora' : 'Já tem conta? Entrar'}
               </button>
@@ -285,7 +285,7 @@ export default function Onboarding() {
       </section>
 
       {/* Pricing preview */}
-      <section className="bg-[#0D1426] border-y border-[#1E2D42] py-16">
+      <section className="bg-[#0A0E18] border-y border-[#1A2230] py-16">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-2xl font-bold text-white mb-2">Preços transparentes, sem surpresas</h2>
           <p className="text-slate-400 mb-10">Escolha o plano ideal para sua estratégia</p>
@@ -297,8 +297,8 @@ export default function Onboarding() {
             ].map((plan) => (
               <div
                 key={plan.name}
-                className={`bg-[#070B14] border rounded-xl p-6 text-left relative ${
-                  plan.popular ? 'border-purple-600/50' : 'border-[#1E2D42]'
+                className={`bg-[#05070D] border rounded-xl p-6 text-left relative ${
+                  plan.popular ? 'border-purple-600/50' : 'border-[#1A2230]'
                 }`}
               >
                 {plan.popular && (

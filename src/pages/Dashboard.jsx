@@ -176,7 +176,7 @@ export default function Dashboard() {
               <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                 <Brain className="w-4 h-4 text-[#06E5D4]" /> Maiores NEXUS Score
               </h3>
-              <Link to="/smart-opportunities" className="text-[10px] text-[#06E5D4] hover:underline">Ver todas →</Link>
+              <Link to="/market-scanner" className="text-[10px] text-[#06E5D4] hover:underline">Ver todas →</Link>
             </div>
             <div className="space-y-1.5">
               {topOpps.map((s) => {

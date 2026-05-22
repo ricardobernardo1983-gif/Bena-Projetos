@@ -122,11 +122,11 @@ export default function Portfolio() {
         </div>
         <div className="flex gap-2">
           <Button onClick={handleOptimize} variant="outline" size="sm" disabled={loadingAI}
-            className="border-[#1E2D42] text-slate-300 gap-2">
-            <Brain className="w-4 h-4 text-blue-400" />
+            className="border-[#1A2230] text-slate-300 gap-2">
+            <Brain className="w-4 h-4 text-[#06E5D4]" />
             {loadingAI ? 'Analisando...' : 'Otimizar com IA'}
           </Button>
-          <Button onClick={() => setShowAdd(true)} size="sm" className="bg-blue-600 hover:bg-blue-700 gap-2">
+          <Button onClick={() => setShowAdd(true)} size="sm" className="bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] gap-2">
             <Plus className="w-4 h-4" /> Adicionar Ação
           </Button>
         </div>
@@ -143,7 +143,7 @@ export default function Portfolio() {
           ].map((card) => {
             const Icon = card.icon
             return (
-              <div key={card.label} className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+              <div key={card.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
                 <div className="flex items-start justify-between mb-2">
                   <p className="text-xs text-slate-500 font-medium">{card.label}</p>
                   <Icon style={{ color: card.color, width: 16, height: 16 }} />
@@ -161,7 +161,7 @@ export default function Portfolio() {
       {/* Charts + positions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Portfolio chart */}
-        <div className="lg:col-span-2 bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+        <div className="lg:col-span-2 bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
           <h3 className="text-sm font-semibold text-white mb-4">Evolução da Carteira</h3>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={histData}>
@@ -175,7 +175,7 @@ export default function Portfolio() {
               <YAxis tick={{ fontSize: 10, fill: '#475569' }} axisLine={false} tickLine={false}
                 tickFormatter={(v) => `R$${(v/1000).toFixed(0)}K`} width={45} />
               <Tooltip
-                contentStyle={{ background: '#0D1426', border: '1px solid #1E2D42', borderRadius: 8 }}
+                contentStyle={{ background: '#0A0E18', border: '1px solid #1A2230', borderRadius: 8 }}
                 formatter={(v) => [formatCurrency(v), 'Valor']}
               />
               <Area type="monotone" dataKey="value" stroke="#10B981" strokeWidth={2} fill="url(#portGrad)" dot={false} />
@@ -184,7 +184,7 @@ export default function Portfolio() {
         </div>
 
         {/* Sector allocation */}
-        <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-4">
+        <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
           <h3 className="text-sm font-semibold text-white mb-3">Alocação Setorial</h3>
           {sectorData.length > 0 && (
             <>
@@ -214,14 +214,14 @@ export default function Portfolio() {
       </div>
 
       {/* Positions table */}
-      <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-[#1E2D42]">
+      <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-[#1A2230]">
           <h3 className="text-sm font-semibold text-white">Posições</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1E2D42] text-[11px] text-slate-500 uppercase">
+              <tr className="border-b border-[#1A2230] text-[11px] text-slate-500 uppercase">
                 <th className="text-left px-4 py-2.5">Ativo</th>
                 <th className="text-right px-4 py-2.5">Qtd</th>
                 <th className="text-right px-4 py-2.5">Preço Médio</th>
@@ -233,7 +233,7 @@ export default function Portfolio() {
                 <th className="px-4 py-2.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E2D42]/50">
+            <tbody className="divide-y divide-[#1A2230]/50">
               {(metrics?.positions || positions).map((pos) => {
                 const q = marketData[pos.ticker]
                 const currentPrice = q?.price || pos.avgPrice
@@ -245,7 +245,7 @@ export default function Portfolio() {
                 const nexus = calculateNexusScore({ historicalData: hist, fundamentals: q || {} })
 
                 return (
-                  <tr key={pos.ticker} className="hover:bg-[#111827] transition-colors">
+                  <tr key={pos.ticker} className="hover:bg-[#0E141F] transition-colors">
                     <td className="px-4 py-3">
                       <div>
                         <p className="font-bold text-white">{pos.ticker}</p>
@@ -266,7 +266,7 @@ export default function Portfolio() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
-                        <button onClick={() => handleEdit(pos)} className="p-1 text-slate-600 hover:text-blue-400">
+                        <button onClick={() => handleEdit(pos)} className="p-1 text-slate-600 hover:text-[#06E5D4]">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button onClick={() => handleDelete(pos.ticker)} className="p-1 text-slate-600 hover:text-red-400">
@@ -284,9 +284,9 @@ export default function Portfolio() {
 
       {/* AI Optimization result */}
       {aiOpt && (
-        <div className="bg-[#0D1426] border border-blue-600/30 rounded-xl p-4">
+        <div className="bg-[#0A0E18] border border-[#06E5D4]/30 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Brain className="w-4 h-4 text-blue-400" />
+            <Brain className="w-4 h-4 text-[#06E5D4]" />
             <h3 className="text-sm font-semibold text-white">Análise e Otimização NEXUS IA</h3>
           </div>
           <div className="text-sm text-slate-300 leading-relaxed prose prose-invert prose-sm max-w-none">
@@ -298,33 +298,33 @@ export default function Portfolio() {
       {/* Add position modal */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-[#0D1426] border border-[#1E2D42] rounded-xl p-6 w-full max-w-sm">
+          <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-6 w-full max-w-sm">
             <h3 className="text-base font-bold text-white mb-4">{editPos ? 'Editar Posição' : 'Adicionar Ação'}</h3>
             <div className="space-y-3">
               <input
                 placeholder="Ticker (ex: VALE3)"
                 value={form.ticker}
                 onChange={(e) => setForm({ ...form, ticker: e.target.value.toUpperCase() })}
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600"
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#06E5D4]"
               />
               <input
                 type="number"
                 placeholder="Quantidade"
                 value={form.quantity}
                 onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600"
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#06E5D4]"
               />
               <input
                 type="number"
                 placeholder="Preço médio (R$)"
                 value={form.avgPrice}
                 onChange={(e) => setForm({ ...form, avgPrice: e.target.value })}
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600"
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-[#06E5D4]"
               />
               <select
                 value={form.sector}
                 onChange={(e) => setForm({ ...form, sector: e.target.value })}
-                className="w-full bg-[#111827] border border-[#1E2D42] rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full bg-[#0E141F] border border-[#1A2230] rounded-lg px-3 py-2 text-sm text-white"
               >
                 {['Financeiro','Petróleo e Gás','Materiais Básicos','Consumo','Varejo','Utilidade Pública','Saúde','Telecom','Imobiliário','Logística','Tecnologia'].map(s => (
                   <option key={s}>{s}</option>
@@ -332,11 +332,11 @@ export default function Portfolio() {
               </select>
             </div>
             <div className="flex gap-2 mt-4">
-              <Button onClick={handleAddPosition} className="flex-1 bg-blue-600 hover:bg-blue-700 text-sm">
+              <Button onClick={handleAddPosition} className="flex-1 bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] text-sm">
                 {editPos ? 'Salvar' : 'Adicionar'}
               </Button>
               <Button variant="outline" onClick={() => { setShowAdd(false); setEditPos(null) }}
-                className="flex-1 border-[#1E2D42] text-slate-300 text-sm">
+                className="flex-1 border-[#1A2230] text-slate-300 text-sm">
                 Cancelar
               </Button>
             </div>
