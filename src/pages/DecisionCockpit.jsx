@@ -11,15 +11,19 @@ import ReactMarkdown from 'react-markdown'
 import { Button } from '@/components/ui/button'
 import ConvictionGauge from '@/components/ConvictionGauge'
 import DataSourceBadge from '@/components/DataSourceBadge'
+import InfoTooltip from '@/components/InfoTooltip'
 import { B3_STOCKS } from '@/lib/mockData'
 import { getStockData } from '@/lib/marketData'
 import { buildThesis } from '@/lib/decisionEngine'
+import { getActiveProfile, getProfileCore } from '@/lib/profile'
 import { analyzeStock } from '@/api/claudeAI'
 import { formatPercent, getChangeColor } from '@/lib/utils'
 import { toast } from 'sonner'
 
 export default function DecisionCockpit() {
-  const [ticker, setTicker] = useState('PETR4')
+  const profile = useMemo(() => getActiveProfile(), [])
+  const coreChips = useMemo(() => getProfileCore(profile.risk_profile), [profile])
+  const [ticker, setTicker] = useState(coreChips[0] || 'PETR4')
   const [search, setSearch] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const [aiThesis, setAiThesis] = useState(null)
@@ -31,7 +35,7 @@ export default function DecisionCockpit() {
   useEffect(() => {
     let active = true
     setLoading(true)
-    getStockData(ticker, { history: true, range: '6mo' }).then((data) => {
+    getStockData(ticker, { history: true }).then((data) => {
       if (!active) return
       setStock(data)
       setSource(data.source)
@@ -40,7 +44,7 @@ export default function DecisionCockpit() {
     return () => { active = false }
   }, [ticker])
 
-  const thesis = useMemo(() => (stock ? buildThesis(stock) : null), [stock])
+  const thesis = useMemo(() => (stock ? buildThesis(stock, profile.risk_profile) : null), [stock, profile])
 
   const chartData = useMemo(() => {
     if (!stock?.historicalData) return []
@@ -101,7 +105,11 @@ export default function DecisionCockpit() {
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#06E5D4]/10 text-[#06E5D4] border border-[#06E5D4]/30">FLAGSHIP</span>
                 <DataSourceBadge source={source} />
               </h1>
-              <p className="text-xs text-[#8B98A8]">Tese completa + cenários + plano de trade gerado por IA</p>
+              <p className="text-xs text-[#8B98A8] flex items-center gap-1.5">
+                Tese + cenários + plano de trade calibrados para seu perfil
+                <span className="font-semibold" style={{ color: profile.color }}>{profile.emoji} {profile.label}</span>
+                <InfoTooltip text={`A análise é personalizada para o perfil ${profile.label}: ${profile.desc}. A adequação de cada ativo ao seu risco é avaliada e exibida abaixo.`} />
+              </p>
             </div>
           </div>
 
@@ -132,9 +140,13 @@ export default function DecisionCockpit() {
           </div>
         </div>
 
-        {/* Quick ticker chips */}
-        <div className="flex gap-1.5 flex-wrap">
-          {['PETR4', 'VALE3', 'ITUB4', 'BBDC4', 'ABEV3', 'WEGE3', 'MGLU3', 'BBAS3', 'ELET3', 'PRIO3'].map((t) => (
+        {/* Quick ticker chips — núcleo do perfil */}
+        <div className="flex gap-1.5 flex-wrap items-center">
+          <span className="term-label flex items-center gap-1 mr-1">
+            Núcleo {profile.label}
+            <InfoTooltip text={`Estes são os ativos do núcleo curado para o perfil ${profile.label} (${profile.focus}). Mude seu perfil em "Meu Perfil" para ver outro conjunto.`} iconSize={10} />
+          </span>
+          {coreChips.map((t) => (
             <button key={t} onClick={() => setTicker(t)}
               className={`text-xs font-bold num px-2.5 py-1 rounded-md border transition-colors ${
                 ticker === t ? 'bg-[#06E5D4]/10 text-[#06E5D4] border-[#06E5D4]/40' : 'bg-[#0A0E18] text-[#8B98A8] border-[#1A2230] hover:border-[#232E40]'
@@ -168,9 +180,27 @@ export default function DecisionCockpit() {
 
             <ConvictionGauge value={thesis.conviction} action={thesis.action} actionColor={thesis.actionColor} size={210} />
 
-            <div className="w-full mt-4 grid grid-cols-2 gap-2">
+            {/* Adequação ao perfil */}
+            <div className="w-full mt-4 bg-[#0E141F] rounded-lg p-3 border"
+              style={{ borderColor: `${thesis.profileFit.color}30` }}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="term-label flex items-center gap-1">
+                  Adequação ao seu perfil
+                  <InfoTooltip term="perfilFit" iconSize={10} />
+                </span>
+                <span className="text-sm font-bold num" style={{ color: thesis.profileFit.color }}>
+                  {thesis.profileFit.fit}<span className="text-[10px] text-[#8B98A8]">/100</span>
+                </span>
+              </div>
+              <div className="score-bar mb-2">
+                <div className="score-bar-fill" style={{ width: `${thesis.profileFit.fit}%`, background: thesis.profileFit.color }} />
+              </div>
+              <p className="text-[10px] text-[#8B98A8] leading-snug">{thesis.profileVerdict}</p>
+            </div>
+
+            <div className="w-full mt-2 grid grid-cols-2 gap-2">
               <div className="bg-[#0E141F] rounded-lg p-2.5 text-center border border-[#1A2230]">
-                <div className="term-label">Preço-Justo IA</div>
+                <div className="term-label flex items-center justify-center gap-1">Preço-Justo IA <InfoTooltip term="precoJusto" iconSize={9} /></div>
                 <div className="text-base font-bold text-[#06E5D4] num">R$ {thesis.expectedPrice.toFixed(2)}</div>
               </div>
               <div className="bg-[#0E141F] rounded-lg p-2.5 text-center border border-[#1A2230]">
@@ -183,12 +213,12 @@ export default function DecisionCockpit() {
 
             <div className="w-full mt-2 grid grid-cols-3 gap-2">
               {[
-                { l: 'NEXUS', v: thesis.nexus.score },
-                { l: 'RSI', v: thesis.metrics.rsi },
-                { l: 'Vol.Anual', v: `${thesis.metrics.annualVol}%` },
+                { l: 'NEXUS', v: thesis.nexus.score, term: 'nexus' },
+                { l: 'RSI', v: thesis.metrics.rsi, term: 'rsi' },
+                { l: 'Vol.Anual', v: `${thesis.metrics.annualVol}%`, term: 'vol' },
               ].map((m) => (
                 <div key={m.l} className="bg-[#0E141F] rounded-lg p-2 text-center border border-[#1A2230]">
-                  <div className="term-label">{m.l}</div>
+                  <div className="term-label flex items-center justify-center gap-1">{m.l} <InfoTooltip term={m.term} iconSize={9} /></div>
                   <div className="text-sm font-bold text-white num">{m.v}</div>
                 </div>
               ))}
@@ -241,21 +271,21 @@ export default function DecisionCockpit() {
             {/* Trade plan strip */}
             <div className="grid grid-cols-4 gap-2 mt-3">
               <div className="bg-[#0E141F] rounded-lg p-2.5 border border-[#06E5D4]/20">
-                <div className="term-label text-[#06E5D4]">Entrada</div>
+                <div className="term-label text-[#06E5D4] flex items-center gap-1">Entrada <InfoTooltip term="entrada" iconSize={9} /></div>
                 <div className="text-sm font-bold text-white num">{thesis.zones.entryLow.toFixed(2)}–{thesis.zones.entryHigh.toFixed(2)}</div>
               </div>
               <div className="bg-[#0E141F] rounded-lg p-2.5 border border-[#FF3B5C]/20">
-                <div className="term-label text-[#FF3B5C]">Stop Loss</div>
+                <div className="term-label text-[#FF3B5C] flex items-center gap-1">Stop Loss <InfoTooltip term="stop" iconSize={9} /></div>
                 <div className="text-sm font-bold text-white num">{thesis.zones.stop.toFixed(2)}</div>
                 <div className="text-[10px] text-[#FF3B5C] num">{formatPercent(thesis.zones.stopPct)}</div>
               </div>
               <div className="bg-[#0E141F] rounded-lg p-2.5 border border-[#00FF94]/20">
-                <div className="term-label text-[#00FF94]">Alvo 1 / 2</div>
+                <div className="term-label text-[#00FF94] flex items-center gap-1">Alvo 1 / 2 <InfoTooltip term="alvo" iconSize={9} /></div>
                 <div className="text-sm font-bold text-white num">{thesis.zones.target1.toFixed(2)} / {thesis.zones.target2.toFixed(2)}</div>
                 <div className="text-[10px] text-[#00FF94] num">{formatPercent(thesis.zones.t1Pct)} / {formatPercent(thesis.zones.t2Pct)}</div>
               </div>
               <div className="bg-[#0E141F] rounded-lg p-2.5 border border-[#1A2230]">
-                <div className="term-label">Risco / Retorno</div>
+                <div className="term-label flex items-center gap-1">Risco / Retorno <InfoTooltip term="riskReward" iconSize={9} /></div>
                 <div className="text-sm font-bold text-[#FFB800] num">{thesis.zones.riskReward} : 1</div>
               </div>
             </div>
@@ -266,6 +296,7 @@ export default function DecisionCockpit() {
             className="xl:col-span-3 term-card p-4">
             <h3 className="text-sm font-semibold text-white flex items-center gap-2 mb-3">
               <Target className="w-4 h-4 text-[#06E5D4]" /> Cenários Ponderados
+              <InfoTooltip term="cenarios" iconSize={11} />
             </h3>
             <div className="space-y-3">
               {thesis.scenarios.map((sc) => (

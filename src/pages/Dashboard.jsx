@@ -8,9 +8,13 @@ import {
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { Button } from '@/components/ui/button'
 import Sparkline from '@/components/Sparkline'
-import { generateMockQuote, generateHistoricalData, B3_STOCKS, MARKET_INDICES } from '@/lib/mockData'
+import DataSourceBadge from '@/components/DataSourceBadge'
+import InfoTooltip from '@/components/InfoTooltip'
+import { generateHistoricalData, MARKET_INDICES } from '@/lib/mockData'
 import { scoreForRadar, RADAR_QUADRANTS } from '@/lib/decisionEngine'
 import { calculateNexusScore } from '@/lib/nexusScore'
+import { getActiveProfile, getProfileCore } from '@/lib/profile'
+import { getCachedStockData, warmCore } from '@/lib/marketData'
 import { formatCurrency, formatPercent, getChangeColor, getNexusScoreColor } from '@/lib/utils'
 
 const FLAGSHIPS = [
@@ -19,28 +23,45 @@ const FLAGSHIPS = [
   { to: '/monte-carlo', icon: Dices, title: 'Monte Carlo', desc: 'Projete 5.000 futuros da carteira', color: '#A855F7' },
 ]
 
+function buildStock(ticker, data) {
+  const nexus = calculateNexusScore({ historicalData: data.historicalData, fundamentals: data.quote })
+  const radar = scoreForRadar({ ticker, name: data.name, sector: data.sector, quote: data.quote, fundamentals: data.quote, historicalData: data.historicalData })
+  return {
+    ...data.quote, ticker, name: data.name, sector: data.sector,
+    nexus, radar, source: data.source, spark: (data.historicalData || []).slice(-30),
+  }
+}
+
 export default function Dashboard() {
+  const profile = useMemo(() => getActiveProfile(), [])
+  const core = useMemo(() => getProfileCore(profile.risk_profile), [profile])
   const [stocks, setStocks] = useState([])
   const [ibovData, setIbovData] = useState([])
+  const [warming, setWarming] = useState(false)
 
   useEffect(() => {
     const hist = generateHistoricalData(90, 118000)
     setIbovData(hist.map((d) => ({ date: d.date, value: d.close })))
 
-    const data = B3_STOCKS.map((meta) => {
-      const quote = generateMockQuote(meta.ticker)
-      const historicalData = generateHistoricalData(60, quote.price)
-      const nexus = calculateNexusScore({ historicalData, fundamentals: quote })
-      const radar = scoreForRadar({ ...meta, quote, fundamentals: quote, historicalData })
-      return { ...meta, ...quote, nexus, radar, spark: historicalData.slice(-30) }
-    })
-    setStocks(data)
-  }, [])
+    // 1) Mostra imediatamente colhendo o cache global (real se já aquecido/navegado, senão simulado)
+    setStocks(core.map((t) => buildStock(t, getCachedStockData(t))))
+
+    // 2) Aquece o núcleo do perfil em background (guard 20min) e re-colhe conforme chega
+    setWarming(true)
+    warmCore({
+      tickers: core,
+      onProgress: (t, data, done, total) => {
+        setStocks((prev) => prev.map((s) => (s.ticker === t ? buildStock(t, data) : s)))
+        if (done >= total) setWarming(false)
+      },
+    }).finally(() => setWarming(false))
+  }, [core])
 
   const topOpps = useMemo(() => [...stocks].sort((a, b) => b.nexus.score - a.nexus.score).slice(0, 6), [stocks])
   const sweetSpots = useMemo(() => stocks.filter((s) => s.radar.quadrant === 'sweet').sort((a, b) => b.radar.returnScore - a.radar.returnScore).slice(0, 5), [stocks])
   const topMovers = useMemo(() => [...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 4), [stocks])
   const topLosers = useMemo(() => [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 4), [stocks])
+  const liveCount = useMemo(() => stocks.filter((s) => s.source === 'live' || s.source === 'cache').length, [stocks])
 
   const ibovChange = MARKET_INDICES[0].change
   const buyCount = stocks.filter((s) => s.nexus?.recommendation?.includes('COMPRA')).length
@@ -55,8 +76,13 @@ export default function Dashboard() {
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
               Central de Comando <span className="live-dot" />
             </h1>
-            <p className="text-xs text-[#8B98A8] num">
-              {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })} · Mercado aberto
+            <p className="text-xs text-[#8B98A8] flex items-center gap-1.5 flex-wrap">
+              <span className="num">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+              <span>· Núcleo</span>
+              <span className="font-semibold" style={{ color: profile.color }}>{profile.emoji} {profile.label}</span>
+              <InfoTooltip text={`Os ativos exibidos são o núcleo curado para o seu perfil ${profile.label} (${profile.focus}). Altere em "Meu Perfil".`} iconSize={11} />
+              {liveCount > 0 && <span className="text-[#00FF94]">· {liveCount} ao vivo</span>}
+              {warming && <span className="text-[#06E5D4] flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#06E5D4] animate-pulse" /> atualizando</span>}
             </p>
           </div>
           <Link to="/cockpit">
@@ -144,7 +170,7 @@ export default function Dashboard() {
           <div className="term-card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                <Radar className="w-4 h-4 text-[#00FF94]" /> Zona Ideal
+                <Radar className="w-4 h-4 text-[#00FF94]" /> Zona Ideal <InfoTooltip term="quadrante" iconSize={11} />
               </h3>
               <Link to="/radar" className="text-[10px] text-[#06E5D4] hover:underline">Ver radar →</Link>
             </div>
@@ -174,7 +200,7 @@ export default function Dashboard() {
           <div className="term-card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                <Brain className="w-4 h-4 text-[#06E5D4]" /> Maiores NEXUS Score
+                <Brain className="w-4 h-4 text-[#06E5D4]" /> Maiores NEXUS Score <InfoTooltip term="nexus" iconSize={11} />
               </h3>
               <Link to="/market-scanner" className="text-[10px] text-[#06E5D4] hover:underline">Ver todas →</Link>
             </div>

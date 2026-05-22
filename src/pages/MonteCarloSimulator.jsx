@@ -5,6 +5,7 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell, Line, ComposedChart
 } from 'recharts'
 import { Button } from '@/components/ui/button'
+import InfoTooltip from '@/components/InfoTooltip'
 import { runMonteCarlo, probabilityOfTarget, buildHistogram } from '@/lib/decisionEngine'
 import { formatCurrency } from '@/lib/utils'
 
@@ -69,6 +70,7 @@ export default function MonteCarloSimulator() {
             <h1 className="text-lg font-bold text-white flex items-center gap-2">
               Simulador Monte Carlo
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#06E5D4]/10 text-[#06E5D4] border border-[#06E5D4]/30">FLAGSHIP</span>
+              <InfoTooltip term="montecarlo" iconSize={12} />
             </h1>
             <p className="text-xs text-[#8B98A8]">5.000 simulações de futuros possíveis da sua carteira</p>
           </div>

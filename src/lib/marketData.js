@@ -11,9 +11,13 @@
 
 import { getQuoteWithHistory, hasBrapiToken } from '@/api/brapiClient'
 import { generateMockQuote, generateHistoricalData, B3_STOCKS } from '@/lib/mockData'
+import { getProfileCore } from '@/lib/profile'
 
 const CACHE_PREFIX = 'nexus_md_'
 const TTL = 20 * 60 * 1000 // 20 minutos
+// Range canônico — TODAS as telas usam o mesmo p/ compartilhar cache.
+// Assim qualquer busca orgânica (Cockpit, Watchlist, Scanner) aquece o cache global.
+export const CANON_RANGE = '6mo'
 const inFlight = new Map()
 
 function readCache(key) {
@@ -47,7 +51,7 @@ function mockStockData(ticker, withHistory) {
  * Retorna { ...meta, quote, fundamentals, historicalData, ticker, source }
  * Tenta cache → Brapi → mock.
  */
-export async function getStockData(ticker, { history = true, range = '6mo', force = false } = {}) {
+export async function getStockData(ticker, { history = true, range = CANON_RANGE, force = false } = {}) {
   const key = `${ticker}_${range}_${history ? 'h' : 'q'}`
 
   if (!force) {
@@ -114,6 +118,56 @@ export async function getMultipleStocks(tickers, { history = false, onProgress, 
     }
   }
   return results
+}
+
+/*
+ * Leitura SEM rede: aproveita o cache (de busca orgânica ou aquecimento do núcleo).
+ * Retorna dados reais se houver cache fresco, senão simulado. NUNCA gasta cota.
+ * Usado por telas de varredura ampla (Dashboard, Radar, etc.) p/ "colher" o cache.
+ */
+export function getCachedStockData(ticker, { history = true, range = CANON_RANGE } = {}) {
+  const key = `${ticker}_${range}_${history ? 'h' : 'q'}`
+  const cached = readCache(key)
+  if (cached) return { ...cached.d, source: 'cache' }
+  return { ...mockStockData(ticker, history), source: 'mock' }
+}
+
+const WARM_KEY = 'nexus_core_warmed_at'
+
+export function coreWarmedRecently() {
+  try {
+    const t = Number(localStorage.getItem(WARM_KEY) || 0)
+    return Date.now() - t < TTL
+  } catch {
+    return false
+  }
+}
+
+/*
+ * Aquece o cache do NÚCLEO de ações do perfil ativo (1 req/ativo no free, throttled).
+ * Guard: só roda se não foi aquecido nos últimos 20min (evita gastar cota à toa).
+ * onProgress(ticker, data, done, total) atualiza a UI conforme chega.
+ */
+export async function warmCore({ tickers, onProgress, force = false } = {}) {
+  const list = tickers || getProfileCore()
+  if (!hasBrapiToken()) {
+    // sem token: entrega mock imediatamente
+    list.forEach((t, i) => onProgress?.(t, { ...mockStockData(t, true), source: 'mock' }, i + 1, list.length))
+    return
+  }
+  if (!force && coreWarmedRecently()) {
+    // já aquecido recentemente: serve do cache, sem rede
+    list.forEach((t, i) => onProgress?.(t, getCachedStockData(t), i + 1, list.length))
+    return
+  }
+  let done = 0
+  for (const t of list) {
+    const d = await getStockData(t, { history: true })
+    done++
+    onProgress?.(t, d, done, list.length)
+    if (d.source === 'live' && done < list.length) await new Promise((r) => setTimeout(r, 200))
+  }
+  try { localStorage.setItem(WARM_KEY, String(Date.now())) } catch {}
 }
 
 export function clearMarketCache() {

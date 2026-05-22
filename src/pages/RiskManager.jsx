@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Shield, AlertTriangle, TrendingDown, BarChart3, Target } from 'lucide-react'
+import InfoTooltip from '@/components/InfoTooltip'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, Tooltip, Cell, BarChart, Bar } from 'recharts'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -91,16 +92,16 @@ export default function RiskManager() {
           {/* Risk metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'VaR 95% (1 dia)', value: `-${riskMetrics.var95.toFixed(2)}%`, sub: `R$ ${riskMetrics.var95Value.toFixed(0)} em risco`, color: '#F59E0B', icon: AlertTriangle },
-              { label: 'VaR 99% (1 dia)', value: `-${riskMetrics.var99.toFixed(2)}%`, sub: `R$ ${riskMetrics.var99Value.toFixed(0)} em risco`, color: '#EF4444', icon: AlertTriangle },
-              { label: 'Beta da Carteira', value: riskMetrics.portfolioBeta.toFixed(2), sub: riskMetrics.portfolioBeta > 1 ? 'Mais volátil que IBOV' : 'Menos volátil que IBOV', color: '#8B5CF6', icon: BarChart3 },
-              { label: 'Sharpe Ratio', value: riskMetrics.sharpeEstimate.toFixed(2), sub: riskMetrics.sharpeEstimate >= 1 ? 'Bom retorno ajustado' : 'Abaixo do ideal (>1)', color: riskMetrics.sharpeEstimate >= 1 ? '#10B981' : '#F59E0B', icon: Target },
+              { label: 'VaR 95% (1 dia)', term: 'var', value: `-${riskMetrics.var95.toFixed(2)}%`, sub: `R$ ${riskMetrics.var95Value.toFixed(0)} em risco`, color: '#F59E0B', icon: AlertTriangle },
+              { label: 'VaR 99% (1 dia)', term: 'var', value: `-${riskMetrics.var99.toFixed(2)}%`, sub: `R$ ${riskMetrics.var99Value.toFixed(0)} em risco`, color: '#EF4444', icon: AlertTriangle },
+              { label: 'Beta da Carteira', term: 'beta', value: riskMetrics.portfolioBeta.toFixed(2), sub: riskMetrics.portfolioBeta > 1 ? 'Mais volátil que IBOV' : 'Menos volátil que IBOV', color: '#8B5CF6', icon: BarChart3 },
+              { label: 'Sharpe Ratio', term: 'sharpe', value: riskMetrics.sharpeEstimate.toFixed(2), sub: riskMetrics.sharpeEstimate >= 1 ? 'Bom retorno ajustado' : 'Abaixo do ideal (>1)', color: riskMetrics.sharpeEstimate >= 1 ? '#10B981' : '#F59E0B', icon: Target },
             ].map((m) => {
               const Icon = m.icon
               return (
                 <div key={m.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
                   <div className="flex items-start justify-between mb-2">
-                    <p className="text-xs text-slate-500 font-medium">{m.label}</p>
+                    <p className="text-xs text-slate-500 font-medium flex items-center gap-1">{m.label} <InfoTooltip term={m.term} iconSize={10} /></p>
                     <Icon style={{ color: m.color, width: 16, height: 16 }} />
                   </div>
                   <p className="text-2xl font-bold tabular-nums" style={{ color: m.color }}>{m.value}</p>

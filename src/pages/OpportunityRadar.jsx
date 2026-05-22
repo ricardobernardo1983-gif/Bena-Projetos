@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Radar as RadarIcon, RefreshCw, Crosshair, TrendingUp, Filter } from 'lucide-react'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { B3_STOCKS, generateMockQuote, generateHistoricalData } from '@/lib/mockData'
@@ -64,6 +65,7 @@ export default function OpportunityRadar() {
               <h1 className="text-lg font-bold text-white flex items-center gap-2">
                 Radar de Oportunidades
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#06E5D4]/10 text-[#06E5D4] border border-[#06E5D4]/30">FLAGSHIP</span>
+                <InfoTooltip term="quadrante" iconSize={12} />
               </h1>
               <p className="text-xs text-[#8B98A8]">{points.length} ativos mapeados por Risco × Retorno em tempo real</p>
             </div>

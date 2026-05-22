@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Settings, User, Bell, Shield, Key, Save, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import InfoTooltip from '@/components/InfoTooltip'
+import { RISK_PROFILES, saveProfile } from '@/lib/profile'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
@@ -12,23 +14,33 @@ export default function UserProfile() {
   const [activeTab, setActiveTab] = useState('profile')
 
   useEffect(() => {
+    // carrega perfil salvo (single source of truth lido por Cockpit/Dashboard)
+    let saved = {}
+    try { saved = JSON.parse(localStorage.getItem('nexus_profile') || '{}') } catch {}
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUser(data.user)
-        setProfile(p => ({ ...p, full_name: data.user.user_metadata?.full_name || '', email: data.user.email }))
-      } else {
-        setUser({ id: 'demo', email: 'demo@nexusb3.com.br', user_metadata: { full_name: 'Usuário Demo' } })
-        setProfile(p => ({ ...p, full_name: 'Usuário Demo', email: 'demo@nexusb3.com.br' }))
-      }
+      const u = data.user || { id: 'demo', email: 'demo@nexusb3.com.br', user_metadata: { full_name: 'Usuário Demo' } }
+      setUser(u)
+      setProfile(p => ({
+        ...p,
+        ...saved,
+        full_name: saved.full_name || u.user_metadata?.full_name || '',
+        email: u.email,
+        risk_profile: saved.risk_profile || 'moderado',
+      }))
     })
   }, [])
 
   async function handleSave() {
     setSaving(true)
-    localStorage.setItem('nexus_profile', JSON.stringify(profile))
-    await new Promise(r => setTimeout(r, 500))
+    saveProfile({
+      full_name: profile.full_name,
+      risk_profile: profile.risk_profile,
+      investment_goals: profile.investment_goals,
+      notifications: profile.notifications,
+    })
+    await new Promise(r => setTimeout(r, 400))
     setSaving(false)
-    toast.success('Perfil salvo!')
+    toast.success('Perfil salvo! O núcleo de ações e as análises foram recalibrados.')
   }
 
   const TABS = [
@@ -88,23 +100,47 @@ export default function UserProfile() {
               className="w-full bg-[#0A0E18] border border-[#1A2230] rounded-lg px-3 py-2.5 text-sm text-slate-500 cursor-not-allowed" />
           </div>
           <div>
-            <label className="text-xs text-slate-400 font-medium mb-1.5 block">Perfil de Risco</label>
+            <label className="text-xs text-slate-400 font-medium mb-1.5 flex items-center gap-1">
+              Perfil de Risco
+              <InfoTooltip text="Seu perfil personaliza TODO o sistema: define o núcleo de ações monitoradas, recalibra as recomendações do Decision Cockpit e a adequação de cada ativo ao seu risco." iconSize={11} />
+            </label>
             <div className="grid grid-cols-3 gap-2">
-              {[
-                { value: 'conservador', label: 'Conservador', desc: 'Prefiro segurança' },
-                { value: 'moderado', label: 'Moderado', desc: 'Equilíbrio' },
-                { value: 'agressivo', label: 'Agressivo', desc: 'Busco retorno máximo' },
-              ].map(r => (
-                <button key={r.value} onClick={() => setProfile({...profile, risk_profile: r.value})}
-                  className={`p-3 rounded-xl border text-left transition-colors ${
-                    profile.risk_profile === r.value ? 'bg-[#06E5D4]/15 border-[#06E5D4]/50 text-[#06E5D4]' : 'bg-[#0E141F] border-[#1A2230] text-slate-400'
-                  }`}>
-                  <p className="text-sm font-semibold">{r.label}</p>
-                  <p className="text-[10px] mt-0.5 opacity-70">{r.desc}</p>
-                </button>
-              ))}
+              {Object.values(RISK_PROFILES).map(r => {
+                const active = profile.risk_profile === r.key
+                return (
+                  <button key={r.key} onClick={() => setProfile({...profile, risk_profile: r.key})}
+                    className="p-3 rounded-xl border text-left transition-colors"
+                    style={active
+                      ? { background: `${r.color}18`, borderColor: `${r.color}80`, color: r.color }
+                      : { background: '#0E141F', borderColor: '#1A2230', color: '#8B98A8' }}>
+                    <p className="text-sm font-semibold">{r.emoji} {r.label}</p>
+                    <p className="text-[10px] mt-0.5 opacity-80 leading-snug">{r.desc}</p>
+                  </button>
+                )
+              })}
             </div>
           </div>
+
+          {/* Núcleo do perfil selecionado */}
+          {RISK_PROFILES[profile.risk_profile] && (
+            <div className="bg-[#0E141F] border border-[#1A2230] rounded-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="term-label flex items-center gap-1">
+                  Núcleo monitorado neste perfil
+                  <InfoTooltip text="Estas ações alimentam seu Dashboard e os atalhos do Decision Cockpit. São atualizadas com dados reais (cache otimizado para a cota da Brapi)." iconSize={10} />
+                </span>
+                <span className="text-[10px]" style={{ color: RISK_PROFILES[profile.risk_profile].color }}>
+                  {RISK_PROFILES[profile.risk_profile].focus}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {RISK_PROFILES[profile.risk_profile].core.map(t => (
+                  <span key={t} className="text-xs font-bold num px-2 py-0.5 rounded-md bg-[#131B28] border border-[#232E40] text-white">{t}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <Button onClick={handleSave} disabled={saving} className="w-full bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] gap-2">
             {saving ? <><Check className="w-4 h-4" /> Salvo!</> : <><Save className="w-4 h-4" /> Salvar Perfil</>}
           </Button>

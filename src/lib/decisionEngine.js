@@ -7,12 +7,13 @@
  */
 
 import { calcRSI, calcSMA, calcATR, calcBollingerBands, calcMACD, calculateNexusScore } from './nexusScore'
+import { profileFit, getActiveProfileKey } from './profile'
 
 /* ────────────────────────────────────────────────────────────
  * 1. DECISION COCKPIT — Trading Thesis Generator
  * ──────────────────────────────────────────────────────────── */
 
-export function buildThesis(stock) {
+export function buildThesis(stock, profileKey) {
   const { historicalData, fundamentals, quote } = stock
   const data = fundamentals || quote || {}
   const closes = (historicalData || []).map((d) => d.close)
@@ -108,6 +109,22 @@ export function buildThesis(stock) {
   if (data.pe && data.pe > 0 && data.pe < 10) catalysts.push({ t: `Valuation descontado (P/L ${data.pe?.toFixed(1)})`, dir: 'pos' })
   if (data.pe && data.pe > 35) catalysts.push({ t: `Valuation esticado (P/L ${data.pe?.toFixed(1)})`, dir: 'neg' })
 
+  // Risk proxy (mesma lógica do radar) p/ adequação ao perfil
+  let riskScore = (annualVol * 100) * 1.2
+  if (data.beta) riskScore += (data.beta - 1) * 25
+  if (data.pe && data.pe > 30) riskScore += 15
+  if (data.pe && data.pe < 0) riskScore += 20
+  if (rsi > 75 || rsi < 25) riskScore += 10
+  riskScore = Math.max(5, Math.min(95, riskScore))
+
+  const fit = profileFit(riskScore, profileKey || getActiveProfileKey())
+
+  // Veredito ajustado ao perfil: bom setup mas inadequado → caveat
+  let profileVerdict
+  if (fit.fit >= 60) profileVerdict = `Compatível com seu perfil ${fit.profileLabel.toLowerCase()}.`
+  else if (conviction >= 62 && fit.level === 'baixa') profileVerdict = `Setup favorável, mas ${fit.note.toLowerCase()}.`
+  else profileVerdict = fit.note + '.'
+
   return {
     price, nexus, conviction, action, actionColor,
     scenarios, expectedPrice: +expectedPrice.toFixed(2), expectedReturn: +expectedReturn.toFixed(1),
@@ -116,6 +133,9 @@ export function buildThesis(stock) {
       t1Pct: +(((target1 - price) / price) * 100).toFixed(1),
       t2Pct: +(((target2 - price) / price) * 100).toFixed(1) },
     catalysts,
+    riskScore: +riskScore.toFixed(0),
+    profileFit: fit,
+    profileVerdict,
     metrics: { rsi: +rsi.toFixed(0), atr: +atr.toFixed(2), annualVol: +(annualVol * 100).toFixed(1), sma20, sma50, sma200 },
   }
 }
