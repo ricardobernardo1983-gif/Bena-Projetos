@@ -10,18 +10,13 @@ import {
 import ReactMarkdown from 'react-markdown'
 import { Button } from '@/components/ui/button'
 import ConvictionGauge from '@/components/ConvictionGauge'
-import { B3_STOCKS, generateMockQuote, generateHistoricalData } from '@/lib/mockData'
+import DataSourceBadge from '@/components/DataSourceBadge'
+import { B3_STOCKS } from '@/lib/mockData'
+import { getStockData } from '@/lib/marketData'
 import { buildThesis } from '@/lib/decisionEngine'
 import { analyzeStock } from '@/api/claudeAI'
 import { formatPercent, getChangeColor } from '@/lib/utils'
 import { toast } from 'sonner'
-
-function loadStock(ticker) {
-  const meta = B3_STOCKS.find((s) => s.ticker === ticker) || { ticker, name: ticker, sector: '—' }
-  const quote = generateMockQuote(ticker)
-  const historicalData = generateHistoricalData(180, quote.price)
-  return { ...meta, quote, historicalData, fundamentals: quote }
-}
 
 export default function DecisionCockpit() {
   const [ticker, setTicker] = useState('PETR4')
@@ -29,11 +24,26 @@ export default function DecisionCockpit() {
   const [showSearch, setShowSearch] = useState(false)
   const [aiThesis, setAiThesis] = useState(null)
   const [loadingAI, setLoadingAI] = useState(false)
+  const [stock, setStock] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [source, setSource] = useState('mock')
 
-  const stock = useMemo(() => loadStock(ticker), [ticker])
-  const thesis = useMemo(() => buildThesis(stock), [stock])
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    getStockData(ticker, { history: true, range: '6mo' }).then((data) => {
+      if (!active) return
+      setStock(data)
+      setSource(data.source)
+      setLoading(false)
+    })
+    return () => { active = false }
+  }, [ticker])
+
+  const thesis = useMemo(() => (stock ? buildThesis(stock) : null), [stock])
 
   const chartData = useMemo(() => {
+    if (!stock?.historicalData) return []
     return stock.historicalData.slice(-90).map((d) => ({ date: d.date, close: d.close }))
   }, [stock])
 
@@ -42,6 +52,7 @@ export default function DecisionCockpit() {
   ).slice(0, 6)
 
   async function generateAI() {
+    if (!thesis || !stock) return
     setAiThesis(null)
     if (!import.meta.env.VITE_ANTHROPIC_API_KEY) {
       setAiThesis(
@@ -71,9 +82,9 @@ export default function DecisionCockpit() {
 
   useEffect(() => { setAiThesis(null) }, [ticker])
 
-  const price = thesis.price
-  const yMin = Math.min(thesis.zones.stop, ...chartData.map((d) => d.close)) * 0.98
-  const yMax = Math.max(thesis.zones.target2, ...chartData.map((d) => d.close)) * 1.02
+  const price = thesis?.price ?? 0
+  const yMin = thesis ? Math.min(thesis.zones.stop, ...chartData.map((d) => d.close)) * 0.98 : 0
+  const yMax = thesis ? Math.max(thesis.zones.target2, ...chartData.map((d) => d.close)) * 1.02 : 0
 
   return (
     <div className="min-h-full terminal-grid">
@@ -88,6 +99,7 @@ export default function DecisionCockpit() {
               <h1 className="text-lg font-bold text-white flex items-center gap-2">
                 Decision Cockpit
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#06E5D4]/10 text-[#06E5D4] border border-[#06E5D4]/30">FLAGSHIP</span>
+                <DataSourceBadge source={source} />
               </h1>
               <p className="text-xs text-[#8B98A8]">Tese completa + cenários + plano de trade gerado por IA</p>
             </div>
@@ -130,6 +142,13 @@ export default function DecisionCockpit() {
           ))}
         </div>
 
+        {!thesis ? (
+          <div className="term-card p-20 flex flex-col items-center justify-center">
+            <div className="w-9 h-9 border-2 border-[#06E5D4] border-t-transparent rounded-full animate-spin mb-3" />
+            <p className="text-sm text-[#8B98A8]">Carregando dados de <span className="num text-white">{ticker}</span>...</p>
+          </div>
+        ) : (
+        <>
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
           {/* LEFT: Conviction + Action */}
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
@@ -317,6 +336,8 @@ export default function DecisionCockpit() {
             )}
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   )

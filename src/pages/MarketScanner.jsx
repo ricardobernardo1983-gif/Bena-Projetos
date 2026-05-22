@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Zap, TrendingUp, TrendingDown, RefreshCw, Search, Filter } from 'lucide-react'
+import { Zap, TrendingUp, TrendingDown, RefreshCw, Search, Filter, Radio } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import NexusScoreBadge from '@/components/NexusScoreBadge'
+import DataSourceBadge from '@/components/DataSourceBadge'
 import { generateMockQuote, generateHistoricalData, B3_STOCKS } from '@/lib/mockData'
+import { getStockData, isLiveEnabled } from '@/lib/marketData'
 import { calculateNexusScore } from '@/lib/nexusScore'
 import { formatPercent, getChangeColor, getChangeBg, formatVolume } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -27,6 +29,8 @@ export default function MarketScanner() {
   const [sortBy, setSortBy] = useState('nexus')
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [liveLoading, setLiveLoading] = useState(false)
+  const [liveProgress, setLiveProgress] = useState(0)
 
   const sectors = ['Todos', ...new Set(B3_STOCKS.map(s => s.sector))]
 
@@ -40,10 +44,31 @@ export default function MarketScanner() {
       const q = generateMockQuote(stock.ticker)
       const hist = generateHistoricalData(80, q.price)
       const nexus = calculateNexusScore({ historicalData: hist, fundamentals: q })
-      return { ...stock, ...q, nexusScore: nexus }
+      return { ...stock, ...q, nexusScore: nexus, source: 'mock' }
     })
     setAllStocks(data)
     setLoading(false)
+  }
+
+  // Atualiza os ativos atualmente filtrados com dados REAIS da Brapi (1 req/ativo + cache)
+  async function loadLiveData() {
+    const targets = filtered.slice(0, 30) // limita p/ proteger a cota
+    if (targets.length === 0) return
+    setLiveLoading(true)
+    setLiveProgress(0)
+    let done = 0
+    for (const stock of targets) {
+      const d = await getStockData(stock.ticker, { history: true, range: '3mo' })
+      const nexus = calculateNexusScore({ historicalData: d.historicalData, fundamentals: d.quote })
+      setAllStocks((prev) => prev.map((s) =>
+        s.ticker === stock.ticker ? { ...s, ...d.quote, nexusScore: nexus, source: d.source } : s
+      ))
+      done++
+      setLiveProgress(Math.round((done / targets.length) * 100))
+      if (d.source === 'live') await new Promise((r) => setTimeout(r, 200))
+    }
+    setLiveLoading(false)
+    toast.success(`${targets.length} ativos atualizados com dados reais`)
   }
 
   function applyFilters() {
@@ -77,11 +102,20 @@ export default function MarketScanner() {
             <Zap className="w-6 h-6 text-[#06E5D4]" />
             Scanner de Mercado
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">{filtered.length} de {allStocks.length} ações · B3</p>
+          <p className="text-xs text-slate-500 mt-0.5">{filtered.length} de {allStocks.length} ações · B3 · varredura simulada (use "Dados Reais" para cotações ao vivo)</p>
         </div>
-        <Button size="sm" variant="outline" onClick={handleRefresh} disabled={refreshing} className="border-[#1A2230] text-slate-400">
-          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Atualizar
-        </Button>
+        <div className="flex items-center gap-2">
+          {isLiveEnabled() && (
+            <Button size="sm" onClick={loadLiveData} disabled={liveLoading}
+              className="bg-[#00FF94]/10 hover:bg-[#00FF94]/20 text-[#00FF94] border border-[#00FF94]/30 gap-1.5">
+              <Radio className={`w-3.5 h-3.5 ${liveLoading ? 'animate-pulse' : ''}`} />
+              {liveLoading ? `Carregando ${liveProgress}%` : 'Dados Reais'}
+            </Button>
+          )}
+          <Button size="sm" variant="outline" onClick={handleRefresh} disabled={refreshing} className="border-[#1A2230] text-slate-400">
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Atualizar
+          </Button>
+        </div>
       </div>
 
       {/* Preset filters */}
@@ -157,7 +191,13 @@ export default function MarketScanner() {
                       <NexusScoreBadge score={stock.nexusScore.score} size="sm" showLabel={false} />
                     </td>
                     <td className="px-4 py-3">
-                      <p className="font-bold text-white">{stock.ticker}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-bold text-white num">{stock.ticker}</p>
+                        {(stock.source === 'live' || stock.source === 'cache') && (
+                          <span className="w-1.5 h-1.5 rounded-full shrink-0" title="Dados reais"
+                            style={{ background: stock.source === 'live' ? '#00FF94' : '#06E5D4' }} />
+                        )}
+                      </div>
                       <p className="text-[10px] text-slate-500 truncate max-w-[140px]">{stock.name}</p>
                     </td>
                     <td className="px-4 py-3 text-right text-white tabular-nums font-semibold">

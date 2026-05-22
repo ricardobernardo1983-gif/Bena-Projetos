@@ -58,6 +58,29 @@ export async function getHistoricalData(ticker, range = '1y', interval = '1d') {
   }))
 }
 
+/*
+ * Cotação + histórico em UMA única requisição (essencial no plano free,
+ * que limita 1 ativo por request). Retorna { quote, historicalData }.
+ */
+export async function getQuoteWithHistory(ticker, range = '6mo', interval = '1d') {
+  const data = await fetchBrapi(`/quote/${ticker}`, { range, interval, fundamental: true })
+  const r = data?.results?.[0]
+  if (!r) return null
+  const historicalData = (r.historicalDataPrice || []).map((d) => ({
+    date: new Date(d.date * 1000).toISOString().split('T')[0],
+    open: d.open,
+    high: d.high,
+    low: d.low,
+    close: d.close ?? d.adjustedClose,
+    volume: d.volume,
+  }))
+  return { quote: normalizeQuote(r), historicalData }
+}
+
+export function hasBrapiToken() {
+  return !!TOKEN
+}
+
 /* ─── Market Data ────────────────────────────────────────────── */
 export async function getAvailableTickers() {
   const data = await fetchBrapi('/available')
@@ -120,8 +143,9 @@ function normalizeQuote(r) {
     volume: r.regularMarketVolume,
     avgVolume: r.averageDailyVolume10Day,
     marketCap: r.marketCap,
-    // Fundamentals
-    pe: r.trailingPE,
+    // Fundamentals (brapi free expõe priceEarnings + earningsPerShare;
+    // demais campos só em planos pagos → ficam undefined e o NEXUS Score trata como neutro)
+    pe: r.priceEarnings ?? r.trailingPE,
     forwardPE: r.forwardPE,
     pb: r.priceToBook,
     roe: r.returnOnEquity ? r.returnOnEquity * 100 : null,
@@ -132,7 +156,7 @@ function normalizeQuote(r) {
     currentRatio: r.currentRatio,
     revenue: r.totalRevenue,
     netIncome: r.netIncomeToCommon,
-    eps: r.epsTrailingTwelveMonths,
+    eps: r.earningsPerShare ?? r.epsTrailingTwelveMonths,
     beta: r.beta,
     sector: r.sector,
     industry: r.industry,

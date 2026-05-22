@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Star, Plus, Trash2, Bell, BellOff, TrendingUp, TrendingDown, Search } from 'lucide-react'
+import { Star, Plus, Trash2, Bell, BellOff, TrendingUp, TrendingDown, Search, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import NexusScoreBadge from '@/components/NexusScoreBadge'
-import { generateMockQuote, generateHistoricalData, B3_STOCKS } from '@/lib/mockData'
+import DataSourceBadge from '@/components/DataSourceBadge'
+import { B3_STOCKS } from '@/lib/mockData'
+import { getStockData, getMultipleStocks, isLiveEnabled } from '@/lib/marketData'
 import { calculateNexusScore } from '@/lib/nexusScore'
 import { formatPercent, getChangeColor } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -19,6 +21,7 @@ export default function Watchlist() {
   const [search, setSearch] = useState('')
   const [newTicker, setNewTicker] = useState('')
   const [alertForm, setAlertForm] = useState({ type: 'price_above', value: '', notification: 'app' })
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('nexus_watchlist') || JSON.stringify(DEFAULT_WATCHLIST))
@@ -28,16 +31,19 @@ export default function Watchlist() {
   }, [])
 
   useEffect(() => {
-    if (watchlist.length > 0) {
-      const data = watchlist.map(ticker => {
-        const q = generateMockQuote(ticker)
-        const hist = generateHistoricalData(60, q.price)
-        const nexus = calculateNexusScore({ historicalData: hist, fundamentals: q })
-        const stock = B3_STOCKS.find(s => s.ticker === ticker)
-        return { ...q, ...stock, ticker, nexusScore: nexus }
+    if (watchlist.length === 0) { setStocks([]); return }
+    let active = true
+    setLoading(true)
+    getMultipleStocks(watchlist, { history: true }).then((results) => {
+      if (!active) return
+      const data = results.map((d) => {
+        const nexus = calculateNexusScore({ historicalData: d.historicalData, fundamentals: d.quote })
+        return { ...d.quote, ...d, ticker: d.ticker, nexusScore: nexus, source: d.source }
       })
       setStocks(data)
-    }
+      setLoading(false)
+    })
+    return () => { active = false }
   }, [watchlist])
 
   function handleAdd() {
@@ -94,8 +100,12 @@ export default function Watchlist() {
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Star className="w-6 h-6 text-amber-400" />
             Watchlist & Alertas
+            {loading && <RefreshCw className="w-4 h-4 text-[#06E5D4] animate-spin" />}
           </h1>
-          <p className="text-slate-400 text-sm">{watchlist.length} ativos monitorados · {alerts.length} alertas ativos</p>
+          <p className="text-slate-400 text-sm flex items-center gap-2">
+            {watchlist.length} ativos monitorados · {alerts.length} alertas ativos
+            {!isLiveEnabled() && <DataSourceBadge source="mock" />}
+          </p>
         </div>
         <Button onClick={() => setShowAdd(true)} size="sm" className="bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] gap-2">
           <Plus className="w-4 h-4" /> Adicionar Ativo
@@ -110,7 +120,10 @@ export default function Watchlist() {
               <div className="flex items-center gap-3">
                 <NexusScoreBadge score={stock.nexusScore.score} size="sm" showLabel={false} />
                 <div>
-                  <p className="text-base font-bold text-white">{stock.ticker}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-base font-bold text-white num">{stock.ticker}</p>
+                    <DataSourceBadge source={stock.source} />
+                  </div>
                   <p className="text-xs text-slate-500 truncate max-w-[120px]">{stock.name}</p>
                 </div>
               </div>
