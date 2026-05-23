@@ -6,18 +6,11 @@ import { Badge } from '@/components/ui/badge'
 import NexusScoreBadge from '@/components/NexusScoreBadge'
 import { generateMockQuote, generateHistoricalData } from '@/lib/mockData'
 import { calculateNexusScore, calcPortfolioMetrics } from '@/lib/nexusScore'
+import { loadPositions, savePositions, dataMode } from '@/lib/userData'
 import { formatCurrency, formatPercent, getChangeColor, getChangeBg } from '@/lib/utils'
 import { toast } from 'sonner'
 import { optimizePortfolio } from '@/api/claudeAI'
 import ReactMarkdown from 'react-markdown'
-
-const DEFAULT_POSITIONS = [
-  { ticker: 'VALE3', quantity: 200, avgPrice: 68.40, sector: 'Materiais Básicos' },
-  { ticker: 'PETR4', quantity: 300, avgPrice: 38.20, sector: 'Petróleo e Gás' },
-  { ticker: 'ITUB4', quantity: 150, avgPrice: 32.50, sector: 'Financeiro' },
-  { ticker: 'ABEV3', quantity: 500, avgPrice: 13.80, sector: 'Consumo' },
-  { ticker: 'BBDC4', quantity: 200, avgPrice: 14.90, sector: 'Financeiro' },
-]
 
 const SECTOR_COLORS = ['#3B82F6','#F59E0B','#10B981','#8B5CF6','#EF4444','#06B6D4','#EC4899','#84CC16']
 
@@ -32,22 +25,21 @@ export default function Portfolio() {
   const [loadingAI, setLoadingAI] = useState(false)
   const [histData, setHistData] = useState([])
   const [activeTab, setActiveTab] = useState('positions')
+  const [mode, setMode] = useState('local')
 
   useEffect(() => {
-    const saved = localStorage.getItem('nexus_portfolio')
-    const pos = saved ? JSON.parse(saved) : DEFAULT_POSITIONS
-    setPositions(pos)
+    loadPositions().then(setPositions)
+    dataMode().then(setMode)
   }, [])
 
   useEffect(() => {
-    if (positions.length > 0) {
-      loadMarketData()
-      savePortfolio()
-    }
+    if (positions.length > 0) loadMarketData()
   }, [positions])
 
-  function savePortfolio() {
-    localStorage.setItem('nexus_portfolio', JSON.stringify(positions))
+  // Atualiza estado + persiste (nuvem ou local conforme login)
+  async function persist(updated) {
+    setPositions(updated)
+    await savePositions(updated)
   }
 
   function loadMarketData() {
@@ -64,16 +56,16 @@ export default function Portfolio() {
     setHistData(histArr.map((d) => ({ date: d.date, value: d.close })))
   }
 
-  function handleAddPosition() {
+  async function handleAddPosition() {
     if (!form.ticker || !form.quantity || !form.avgPrice) return toast.error('Preencha todos os campos')
     const newPos = { ...form, quantity: Number(form.quantity), avgPrice: Number(form.avgPrice) }
     const updated = editPos
       ? positions.map((p) => p.ticker === editPos.ticker ? newPos : p)
       : [...positions, newPos]
-    setPositions(updated)
     setForm({ ticker: '', quantity: '', avgPrice: '', sector: 'Financeiro' })
     setShowAdd(false)
     setEditPos(null)
+    await persist(updated)
     toast.success(editPos ? 'Posição atualizada' : 'Posição adicionada')
   }
 
@@ -83,8 +75,8 @@ export default function Portfolio() {
     setShowAdd(true)
   }
 
-  function handleDelete(ticker) {
-    setPositions(positions.filter((p) => p.ticker !== ticker))
+  async function handleDelete(ticker) {
+    await persist(positions.filter((p) => p.ticker !== ticker))
     toast.success('Posição removida')
   }
 
@@ -118,7 +110,16 @@ export default function Portfolio() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Minha Carteira</h1>
-          <p className="text-slate-400 text-sm">Portfólio virtual com análise por IA</p>
+          <p className="text-slate-400 text-sm flex items-center gap-2">
+            Portfólio virtual com análise por IA
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border num"
+              style={mode === 'cloud'
+                ? { color: '#00FF94', background: '#00FF9412', borderColor: '#00FF9440' }
+                : { color: '#8B98A8', background: '#131B28', borderColor: '#232E40' }}
+              title={mode === 'cloud' ? 'Sincronizado na nuvem (Supabase)' : 'Salvo localmente neste navegador'}>
+              {mode === 'cloud' ? '☁ NA NUVEM' : '💾 LOCAL'}
+            </span>
+          </p>
         </div>
         <div className="flex gap-2">
           <Button onClick={handleOptimize} variant="outline" size="sm" disabled={loadingAI}

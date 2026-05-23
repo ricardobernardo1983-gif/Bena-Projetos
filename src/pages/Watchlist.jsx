@@ -6,11 +6,10 @@ import NexusScoreBadge from '@/components/NexusScoreBadge'
 import DataSourceBadge from '@/components/DataSourceBadge'
 import { B3_STOCKS } from '@/lib/mockData'
 import { getStockData, getMultipleStocks, isLiveEnabled } from '@/lib/marketData'
+import { loadWatchlist, addWatchlistTicker, removeWatchlistTicker, loadAlerts, addAlert, removeAlert, dataMode } from '@/lib/userData'
 import { calculateNexusScore } from '@/lib/nexusScore'
 import { formatPercent, getChangeColor } from '@/lib/utils'
 import { toast } from 'sonner'
-
-const DEFAULT_WATCHLIST = ['VALE3', 'PETR4', 'ITUB4', 'ABEV3', 'WEGE3']
 
 export default function Watchlist() {
   const [watchlist, setWatchlist] = useState([])
@@ -22,12 +21,12 @@ export default function Watchlist() {
   const [newTicker, setNewTicker] = useState('')
   const [alertForm, setAlertForm] = useState({ type: 'price_above', value: '', notification: 'app' })
   const [loading, setLoading] = useState(false)
+  const [mode, setMode] = useState('local')
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('nexus_watchlist') || JSON.stringify(DEFAULT_WATCHLIST))
-    setWatchlist(saved)
-    const savedAlerts = JSON.parse(localStorage.getItem('nexus_alerts') || '[]')
-    setAlerts(savedAlerts)
+    loadWatchlist().then(setWatchlist)
+    loadAlerts().then(setAlerts)
+    dataMode().then(setMode)
   }, [])
 
   useEffect(() => {
@@ -46,47 +45,35 @@ export default function Watchlist() {
     return () => { active = false }
   }, [watchlist])
 
-  function handleAdd() {
+  async function handleAdd() {
     const t = newTicker.toUpperCase().trim()
     if (!t) return
     if (watchlist.includes(t)) return toast.error('Já está na watchlist')
-    const updated = [...watchlist, t]
-    setWatchlist(updated)
-    localStorage.setItem('nexus_watchlist', JSON.stringify(updated))
+    setWatchlist([...watchlist, t])
+    await addWatchlistTicker(t)
     setNewTicker('')
     setShowAdd(false)
     toast.success(`${t} adicionado à watchlist`)
   }
 
-  function handleRemove(ticker) {
-    const updated = watchlist.filter(t => t !== ticker)
-    setWatchlist(updated)
-    localStorage.setItem('nexus_watchlist', JSON.stringify(updated))
+  async function handleRemove(ticker) {
+    setWatchlist(watchlist.filter(t => t !== ticker))
+    await removeWatchlistTicker(ticker)
     toast.success('Removido da watchlist')
   }
 
-  function handleSaveAlert() {
+  async function handleSaveAlert() {
     if (!alertForm.value) return toast.error('Informe o valor do alerta')
-    const alert = {
-      id: Date.now(),
-      ticker: showAlert,
-      ...alertForm,
-      value: Number(alertForm.value),
-      created: new Date().toISOString(),
-      triggered: false,
-    }
-    const updated = [...alerts, alert]
-    setAlerts(updated)
-    localStorage.setItem('nexus_alerts', JSON.stringify(updated))
+    const created = await addAlert({ ticker: showAlert, ...alertForm, value: Number(alertForm.value) })
+    setAlerts([created, ...alerts])
     setShowAlert(null)
     setAlertForm({ type: 'price_above', value: '', notification: 'app' })
     toast.success('Alerta criado!')
   }
 
-  function handleDeleteAlert(id) {
-    const updated = alerts.filter(a => a.id !== id)
-    setAlerts(updated)
-    localStorage.setItem('nexus_alerts', JSON.stringify(updated))
+  async function handleDeleteAlert(id) {
+    setAlerts(alerts.filter(a => a.id !== id))
+    await removeAlert(id)
   }
 
   const suggestions = B3_STOCKS.filter(s =>
@@ -104,7 +91,13 @@ export default function Watchlist() {
           </h1>
           <p className="text-slate-400 text-sm flex items-center gap-2">
             {watchlist.length} ativos monitorados · {alerts.length} alertas ativos
-            {!isLiveEnabled() && <DataSourceBadge source="mock" />}
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border num"
+              style={mode === 'cloud'
+                ? { color: '#00FF94', background: '#00FF9412', borderColor: '#00FF9440' }
+                : { color: '#8B98A8', background: '#131B28', borderColor: '#232E40' }}
+              title={mode === 'cloud' ? 'Sincronizado na nuvem (Supabase)' : 'Salvo localmente neste navegador'}>
+              {mode === 'cloud' ? '☁ NA NUVEM' : '💾 LOCAL'}
+            </span>
           </p>
         </div>
         <Button onClick={() => setShowAdd(true)} size="sm" className="bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] gap-2">
