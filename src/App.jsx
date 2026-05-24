@@ -5,6 +5,7 @@ import Layout from './Layout'
 
 // Pages
 import Onboarding from './pages/Onboarding'
+import Setup from './pages/Setup'
 import Dashboard from './pages/Dashboard'
 import DecisionCockpit from './pages/DecisionCockpit'
 import OpportunityRadar from './pages/OpportunityRadar'
@@ -48,6 +49,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/onboarding" replace />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/setup" element={<Setup />} />
         <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
         <Route path="/cockpit" element={<PageWrapper><DecisionCockpit /></PageWrapper>} />
         <Route path="/radar" element={<PageWrapper><OpportunityRadar /></PageWrapper>} />

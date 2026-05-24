@@ -10,10 +10,18 @@ CREATE TABLE IF NOT EXISTS profiles (
   risk_profile TEXT DEFAULT 'moderado',
   plan TEXT DEFAULT 'trial',
   investment_goals TEXT[],
+  capital NUMERIC,
   notifications BOOLEAN DEFAULT true,
+  onboarding_completed BOOLEAN DEFAULT false,
+  tutorial_completed BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migração: garante colunas em bancos já criados (ALTER idempotente)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS capital NUMERIC;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT false;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tutorial_completed BOOLEAN DEFAULT false;
 
 -- Portfolios
 CREATE TABLE IF NOT EXISTS portfolios (

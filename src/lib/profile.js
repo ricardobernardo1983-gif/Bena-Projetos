@@ -96,6 +96,18 @@ export function getProfileMC(key) {
  * - se o Supabase estiver configurado e houver usuário logado, espelha lá
  * Importa supabase de forma dinâmica p/ não acoplar nem quebrar no modo demo.
  */
+// Campos do perfil que persistem (local + nuvem)
+const PROFILE_FIELDS = [
+  'full_name', 'risk_profile', 'investment_goals', 'capital',
+  'notifications', 'onboarding_completed', 'tutorial_completed',
+]
+
+function pickProfileFields(obj) {
+  const out = {}
+  for (const k of PROFILE_FIELDS) if (obj[k] !== undefined) out[k] = obj[k]
+  return out
+}
+
 export async function syncProfileToSupabase(patch) {
   try {
     if (!import.meta.env.VITE_SUPABASE_URL) return { synced: false }
@@ -104,10 +116,7 @@ export async function syncProfileToSupabase(patch) {
     if (!data?.user) return { synced: false }
     await supabase.from('profiles').upsert({
       id: data.user.id,
-      full_name: patch.full_name,
-      risk_profile: patch.risk_profile,
-      investment_goals: patch.investment_goals,
-      notifications: patch.notifications,
+      ...pickProfileFields(patch),
       updated_at: new Date().toISOString(),
     })
     return { synced: true }
@@ -125,17 +134,32 @@ export async function loadProfileFromSupabase() {
     const { data: prof } = await supabase.from('profiles').select('*').eq('id', data.user.id).single()
     if (prof) {
       // espelha no localStorage p/ uso offline-first
-      saveProfile({
-        full_name: prof.full_name,
-        risk_profile: prof.risk_profile,
-        investment_goals: prof.investment_goals,
-        notifications: prof.notifications,
-      })
+      saveProfile(pickProfileFields(prof))
     }
     return prof || null
   } catch {
     return null
   }
+}
+
+/* ─── Onboarding / Tutorial flags ──────────────────────────── */
+export function isOnboardingCompleted() {
+  return !!getActiveProfile().onboarding_completed
+}
+
+export function isTutorialCompleted() {
+  return !!getActiveProfile().tutorial_completed
+}
+
+export async function markOnboardingCompleted(extra = {}) {
+  const patch = { onboarding_completed: true, ...extra }
+  saveProfile(patch)
+  await syncProfileToSupabase(getActiveProfile())
+}
+
+export async function markTutorialCompleted(value = true) {
+  saveProfile({ tutorial_completed: value })
+  await syncProfileToSupabase(getActiveProfile())
 }
 
 /*

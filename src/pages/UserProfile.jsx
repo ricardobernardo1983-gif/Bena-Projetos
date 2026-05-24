@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, User, Bell, Shield, Key, Save, Check } from 'lucide-react'
+import { Settings, User, Bell, Shield, Key, Save, Check, BookOpen, RefreshCw } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import InfoTooltip from '@/components/InfoTooltip'
-import { RISK_PROFILES, saveProfile, syncProfileToSupabase } from '@/lib/profile'
+import { RISK_PROFILES, saveProfile, syncProfileToSupabase, markTutorialCompleted } from '@/lib/profile'
+import { triggerTour } from '@/lib/tour'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
 export default function UserProfile() {
+  const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState({ full_name: '', risk_profile: 'moderado', investment_goals: [], notifications: true })
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState('profile')
+
+  async function restartTutorial() {
+    await markTutorialCompleted(false)
+    navigate('/dashboard')
+    setTimeout(() => triggerTour(), 350)
+  }
 
   useEffect(() => {
     // carrega perfil salvo (single source of truth lido por Cockpit/Dashboard)
@@ -149,6 +158,21 @@ export default function UserProfile() {
           <Button onClick={handleSave} disabled={saving} className="w-full bg-[#06E5D4]/15 hover:bg-[#06E5D4]/25 border border-[#06E5D4]/30 text-[#06E5D4] gap-2">
             {saving ? <><Check className="w-4 h-4" /> Salvo!</> : <><Save className="w-4 h-4" /> Salvar Perfil</>}
           </Button>
+
+          {/* Refazer tutorial */}
+          <div className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4 flex items-center gap-3 mt-2">
+            <div className="w-10 h-10 rounded-lg bg-[#A855F7]/15 border border-[#A855F7]/30 flex items-center justify-center shrink-0">
+              <BookOpen className="w-5 h-5 text-[#A855F7]" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-white">Tutorial Interativo</p>
+              <p className="text-xs text-[#8B98A8]">Aprenda novamente as principais funcionalidades em ~3 minutos</p>
+            </div>
+            <Button onClick={restartTutorial} size="sm" variant="outline"
+              className="border-[#A855F7]/40 bg-[#A855F7]/10 hover:bg-[#A855F7]/20 text-[#A855F7] gap-1.5 shrink-0">
+              <RefreshCw className="w-3.5 h-3.5" /> Refazer
+            </Button>
+          </div>
         </div>
       )}
 

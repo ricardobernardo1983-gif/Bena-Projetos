@@ -11,7 +11,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import B3Ticker from '@/components/B3Ticker'
+import TourGuide from '@/components/TourGuide'
 import { supabase } from '@/lib/supabase'
+import { loadProfileFromSupabase, isOnboardingCompleted } from '@/lib/profile'
+import { subscribeTour } from '@/lib/tour'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', page: '/dashboard', icon: LayoutDashboard, description: 'Visão geral' },
@@ -41,7 +44,8 @@ const BOTTOM_ITEMS = [
   { label: 'Admin', page: '/admin', icon: Users, adminOnly: true },
 ]
 
-const PAGES_WITHOUT_LAYOUT = ['/onboarding', '/', '/login']
+const PAGES_WITHOUT_LAYOUT = ['/onboarding', '/', '/login', '/setup']
+const PAGES_WITHOUT_GUARD = ['/onboarding', '/', '/login', '/setup']
 
 export default function Layout({ children, currentPagePath }) {
   const [collapsed, setCollapsed] = useState(false)
@@ -53,24 +57,38 @@ export default function Layout({ children, currentPagePath }) {
   const location = useLocation()
 
   const noLayout = PAGES_WITHOUT_LAYOUT.includes(location.pathname)
+  const [tourOpen, setTourOpen] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    async function init() {
+      const { data } = await supabase.auth.getUser()
       setUser(data.user)
-      // Load user plan from profile
       if (data.user) {
         const saved = localStorage.getItem(`nexus_plan_${data.user.id}`) || 'trial'
         setPlan(saved)
         const savedAlerts = parseInt(localStorage.getItem(`nexus_alerts_${data.user.id}`) || '0')
         setAlerts(savedAlerts)
+        // Atualiza espelho local do perfil a partir da nuvem
+        await loadProfileFromSupabase()
       }
-    })
-    // Check demo mode (no Supabase configured)
-    if (!import.meta.env.VITE_SUPABASE_URL) {
-      const demoUser = { id: 'demo', email: 'demo@nexusb3.com.br', user_metadata: { full_name: 'Usuário Demo' } }
-      setUser(demoUser)
-      setPlan('pro') // Demo gets Pro plan
+      if (!import.meta.env.VITE_SUPABASE_URL) {
+        const demoUser = { id: 'demo', email: 'demo@nexusb3.com.br', user_metadata: { full_name: 'Usuário Demo' } }
+        setUser(demoUser)
+        setPlan('pro')
+      }
+      // Guard: força onboarding antes do app
+      if ((data.user || !import.meta.env.VITE_SUPABASE_URL)
+        && !isOnboardingCompleted()
+        && !PAGES_WITHOUT_GUARD.includes(location.pathname)) {
+        navigate('/setup')
+      }
     }
+    init()
+  }, [location.pathname])
+
+  // Inscreve no evento global do tour (acionado pelo Setup, UserProfile, etc.)
+  useEffect(() => {
+    return subscribeTour((open) => setTourOpen(open))
   }, [])
 
   const handleSignOut = async () => {
@@ -261,6 +279,9 @@ export default function Layout({ children, currentPagePath }) {
           {children}
         </main>
       </div>
+
+      {/* Tutorial Interativo (global) */}
+      <TourGuide open={tourOpen} onClose={() => setTourOpen(false)} />
     </div>
   )
 }
