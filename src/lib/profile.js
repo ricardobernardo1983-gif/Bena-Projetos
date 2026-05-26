@@ -98,7 +98,8 @@ export function getProfileMC(key) {
  */
 // Campos do perfil que persistem (local + nuvem)
 const PROFILE_FIELDS = [
-  'full_name', 'risk_profile', 'investment_goals', 'capital',
+  'full_name', 'email', 'role', 'active', 'plan', 'plan_status',
+  'risk_profile', 'investment_goals', 'capital',
   'notifications', 'onboarding_completed', 'tutorial_completed',
 ]
 
@@ -160,6 +161,16 @@ export async function markOnboardingCompleted(extra = {}) {
 export async function markTutorialCompleted(value = true) {
   saveProfile({ tutorial_completed: value })
   await syncProfileToSupabase(getActiveProfile())
+}
+
+/* ─── Role / Status ───────────────────────────────────────── */
+export function isAdmin() {
+  return getActiveProfile().role === 'admin'
+}
+
+export function isAccountActive() {
+  const p = getActiveProfile()
+  return p.active !== false // default true
 }
 
 /*

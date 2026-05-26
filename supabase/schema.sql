@@ -22,6 +22,26 @@ CREATE TABLE IF NOT EXISTS profiles (
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS capital NUMERIC;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT false;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tutorial_completed BOOLEAN DEFAULT false;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user'; -- 'user' | 'admin'
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS active BOOLEAN DEFAULT true;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS plan_status TEXT DEFAULT 'active'; -- 'active' | 'canceled' | 'past_due'
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS plan_renewed_at TIMESTAMPTZ;
+
+-- Backfill email a partir de auth.users (idempotente)
+UPDATE profiles p SET email = u.email
+  FROM auth.users u WHERE u.id = p.id AND (p.email IS NULL OR p.email = '');
+
+-- Promove o admin do sistema (caso a conta já exista)
+UPDATE profiles SET role = 'admin' WHERE email = 'ricardobernardo1983@gmail.com';
+
+-- Função SECURITY DEFINER para checar admin sem causar recursão na RLS
+CREATE OR REPLACE FUNCTION public.is_admin(uid UUID)
+RETURNS BOOLEAN
+LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE
+AS $$
+  SELECT EXISTS (SELECT 1 FROM profiles WHERE id = uid AND role = 'admin');
+$$;
 
 -- Portfolios
 CREATE TABLE IF NOT EXISTS portfolios (
@@ -112,10 +132,13 @@ ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE backtests ENABLE ROW LEVEL SECURITY;
 
--- Profiles (chave = id)
+-- Profiles: usuário acessa o próprio; admin acessa qualquer um
 DROP POLICY IF EXISTS "profiles_own" ON profiles;
-CREATE POLICY "profiles_own" ON profiles
-  FOR ALL USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+DROP POLICY IF EXISTS "profiles_access" ON profiles;
+CREATE POLICY "profiles_access" ON profiles
+  FOR ALL
+  USING (auth.uid() = id OR public.is_admin(auth.uid()))
+  WITH CHECK (auth.uid() = id OR public.is_admin(auth.uid()));
 
 -- Portfolios
 DROP POLICY IF EXISTS "portfolios_own" ON portfolios;
@@ -156,8 +179,13 @@ CREATE POLICY "backtests_own" ON backtests
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name)
-  VALUES (new.id, new.raw_user_meta_data->>'full_name')
+  INSERT INTO public.profiles (id, full_name, email, role)
+  VALUES (
+    new.id,
+    new.raw_user_meta_data->>'full_name',
+    new.email,
+    CASE WHEN new.email = 'ricardobernardo1983@gmail.com' THEN 'admin' ELSE 'user' END
+  )
   ON CONFLICT (id) DO NOTHING;
   RETURN new;
 END;

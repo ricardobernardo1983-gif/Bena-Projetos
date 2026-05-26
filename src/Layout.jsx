@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import B3Ticker from '@/components/B3Ticker'
 import TourGuide from '@/components/TourGuide'
 import { supabase } from '@/lib/supabase'
-import { loadProfileFromSupabase, isOnboardingCompleted } from '@/lib/profile'
+import { loadProfileFromSupabase, isOnboardingCompleted, isAdmin } from '@/lib/profile'
 import { subscribeTour } from '@/lib/tour'
 
 const NAV_ITEMS = [
@@ -185,7 +185,7 @@ export default function Layout({ children, currentPagePath }) {
       {/* Bottom */}
       <div className="border-t border-[#1A2230] px-2 py-2 space-y-0.5 shrink-0">
         {BOTTOM_ITEMS.map((item) => {
-          if (item.adminOnly && user?.email !== 'ricardobernardo1983@gmail.com') return null
+          if (item.adminOnly && !isAdmin()) return null
           const Icon = item.icon
           const isActive = location.pathname === item.page
           return (
