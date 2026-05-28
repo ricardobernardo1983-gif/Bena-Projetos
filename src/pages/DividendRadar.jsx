@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { DollarSign, Calendar, TrendingUp, Star, Filter, Search } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { DollarSign, Calendar, TrendingUp, Star, Filter, Search, ChevronDown } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { generateMockQuote, generateDividends, B3_STOCKS } from '@/lib/mockData'
@@ -23,15 +23,30 @@ export default function DividendRadar() {
   const [minYield, setMinYield] = useState(0)
   const [sortBy, setSortBy] = useState('dy')
   const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState(null)
 
   useEffect(() => {
     const data = B3_STOCKS.slice(0, 30).map((stock) => {
       const quote = generateMockQuote(stock.ticker)
-      const dividends = generateDividends(stock.ticker, 2)
-      const lastYear = dividends.filter(d => new Date(d.date) > new Date(Date.now() - 365 * 24 * 60 * 60 * 1000))
+      const dividends5y = generateDividends(stock.ticker, 5)
+      const lastYear = dividends5y.filter((d) => new Date(d.date) > new Date(Date.now() - 365 * 24 * 60 * 60 * 1000))
       const annualDividend = lastYear.reduce((s, d) => s + d.value, 0)
       const dy = quote.price > 0 ? (annualDividend / quote.price) * 100 : quote.dividendYield || 0
-      return { ...stock, ...quote, dividendYield: dy, annualDividend, dividendHistory: dividends.slice(0, 6) }
+      const payoutRatio = quote.eps > 0 ? Math.min(200, (annualDividend / quote.eps) * 100) : null
+
+      // Group by year for 5-year history
+      const byYear = {}
+      dividends5y.forEach((d) => {
+        const y = new Date(d.date).getFullYear()
+        byYear[y] = (byYear[y] || 0) + d.value
+      })
+      const dyHistory = Object.entries(byYear).map(([year, div]) => ({
+        year,
+        dy: quote.price > 0 ? parseFloat(((div / quote.price) * 100).toFixed(2)) : 0,
+        div: parseFloat(div.toFixed(2)),
+      })).sort((a, b) => a.year - b.year)
+
+      return { ...stock, ...quote, dividendYield: dy, annualDividend, payoutRatio, dyHistory }
     })
     setStocks(data)
     setLoading(false)
@@ -170,32 +185,90 @@ export default function DividendRadar() {
                 <th className="text-left px-4 py-2.5">Ativo</th>
                 <th className="text-right px-4 py-2.5">Preço</th>
                 <th className="text-right px-4 py-2.5">DY 12M</th>
-                <th className="text-right px-4 py-2.5">Dividend Anual</th>
+                <th className="text-right px-4 py-2.5">Provento/ano</th>
+                <th className="text-right px-4 py-2.5">Payout</th>
                 <th className="text-right px-4 py-2.5">P/L</th>
                 <th className="text-right px-4 py-2.5">ROE</th>
-                <th className="text-right px-4 py-2.5">Setor</th>
+                <th className="px-4 py-2.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1A2230]/50">
+            <tbody>
               {filtered.slice(0, 20).map((stock) => (
-                <tr key={stock.ticker} className="hover:bg-[#0E141F] transition-colors">
-                  <td className="px-4 py-3">
-                    <p className="font-bold text-white">{stock.ticker}</p>
-                    <p className="text-[10px] text-slate-500 truncate max-w-[120px]">{stock.name}</p>
-                  </td>
-                  <td className="px-4 py-3 text-right text-white tabular-nums">R$ {stock.price?.toFixed(2)}</td>
-                  <td className="px-4 py-3 text-right">
-                    <span className={`font-bold tabular-nums ${stock.dividendYield >= 6 ? 'text-amber-400' : stock.dividendYield >= 3 ? 'text-emerald-400' : 'text-slate-400'}`}>
-                      {stock.dividendYield.toFixed(2)}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right text-white tabular-nums">R$ {stock.annualDividend.toFixed(2)}</td>
-                  <td className="px-4 py-3 text-right text-slate-400 tabular-nums">{stock.pe?.toFixed(1) || '—'}</td>
-                  <td className="px-4 py-3 text-right text-slate-400 tabular-nums">{stock.roe ? `${stock.roe.toFixed(1)}%` : '—'}</td>
-                  <td className="px-4 py-3 text-right">
-                    <span className="text-xs text-slate-500">{stock.sector}</span>
-                  </td>
-                </tr>
+                <>
+                  <tr key={stock.ticker}
+                    className="hover:bg-[#0E141F] transition-colors border-b border-[#1A2230]/50 cursor-pointer"
+                    onClick={() => setExpanded(expanded === stock.ticker ? null : stock.ticker)}>
+                    <td className="px-4 py-3">
+                      <p className="font-bold text-white">{stock.ticker}</p>
+                      <p className="text-[10px] text-slate-500 truncate max-w-[120px]">{stock.name}</p>
+                    </td>
+                    <td className="px-4 py-3 text-right text-white tabular-nums">R$ {stock.price?.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={`font-bold tabular-nums ${stock.dividendYield >= 6 ? 'text-amber-400' : stock.dividendYield >= 3 ? 'text-emerald-400' : 'text-slate-400'}`}>
+                        {stock.dividendYield.toFixed(2)}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right text-white tabular-nums">R$ {stock.annualDividend.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {stock.payoutRatio !== null ? (
+                        <span className={`font-semibold ${stock.payoutRatio > 100 ? 'text-red-400' : stock.payoutRatio > 70 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                          {stock.payoutRatio.toFixed(0)}%
+                        </span>
+                      ) : <span className="text-slate-600">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-right text-slate-400 tabular-nums">{stock.pe?.toFixed(1) || '—'}</td>
+                    <td className="px-4 py-3 text-right text-slate-400 tabular-nums">{stock.roe ? `${stock.roe.toFixed(1)}%` : '—'}</td>
+                    <td className="px-4 py-3 text-slate-600">
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded === stock.ticker ? 'rotate-180' : ''}`} />
+                    </td>
+                  </tr>
+                  {expanded === stock.ticker && stock.dyHistory.length > 0 && (
+                    <tr key={`${stock.ticker}-hist`} className="border-b border-[#1A2230]/50">
+                      <td colSpan={8} className="px-4 py-3 bg-[#0A0E1F]">
+                        <div className="flex items-center gap-6">
+                          <div>
+                            <p className="text-[10px] text-slate-500 mb-2 font-semibold">HISTÓRICO DY 5 ANOS</p>
+                            <ResponsiveContainer width={220} height={80}>
+                              <BarChart data={stock.dyHistory} margin={{ left: 0, right: 0 }}>
+                                <XAxis dataKey="year" tick={{ fontSize: 9, fill: '#475569' }} axisLine={false} tickLine={false} />
+                                <YAxis hide />
+                                <Tooltip contentStyle={{ background: '#0A0E18', border: '1px solid #1A2230', borderRadius: 6, fontSize: 10 }}
+                                  formatter={(v) => [`${v}%`, 'DY']} />
+                                <Bar dataKey="dy" radius={[2, 2, 0, 0]}>
+                                  {stock.dyHistory.map((_, i) => (
+                                    <Cell key={i} fill={i === stock.dyHistory.length - 1 ? '#F59E0B' : '#1A2230'} />
+                                  ))}
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div className="space-y-1">
+                            {stock.dyHistory.slice().reverse().map((d) => (
+                              <div key={d.year} className="flex items-center gap-3">
+                                <span className="text-[10px] text-slate-500 w-10">{d.year}</span>
+                                <div className="h-1.5 rounded-full bg-[#1A2230] w-24">
+                                  <div className="h-full rounded-full bg-amber-500"
+                                    style={{ width: `${Math.min((d.dy / 15) * 100, 100)}%` }} />
+                                </div>
+                                <span className="text-xs font-bold text-amber-400 num">{d.dy.toFixed(2)}%</span>
+                                <span className="text-[10px] text-slate-600">R$ {d.div.toFixed(2)}/ação</span>
+                              </div>
+                            ))}
+                          </div>
+                          {stock.payoutRatio !== null && (
+                            <div className="ml-auto text-right">
+                              <p className="text-[10px] text-slate-500">Payout Ratio</p>
+                              <p className={`text-2xl font-bold num ${stock.payoutRatio > 100 ? 'text-red-400' : stock.payoutRatio > 70 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                {stock.payoutRatio.toFixed(0)}%
+                              </p>
+                              <p className="text-[9px] text-slate-600">{stock.payoutRatio > 100 ? 'Acima do lucro!' : stock.payoutRatio > 70 ? 'Generoso — sustentar?' : 'Sustentável'}</p>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
               ))}
             </tbody>
           </table>

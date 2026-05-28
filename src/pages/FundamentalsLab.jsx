@@ -15,10 +15,29 @@ export default function FundamentalsLab() {
 
   const sectors = ['Todos', ...new Set(B3_STOCKS.map(s => s.sector))]
 
+  function calcGrahamNumber(stock) {
+    const { eps, pb, price } = stock
+    if (!eps || eps <= 0 || !pb || pb <= 0 || !price || price <= 0) return null
+    const bvps = price / pb
+    return Math.sqrt(22.5 * eps * bvps)
+  }
+
+  function calcMagicScore(stock) {
+    const ey = stock.pe > 0 ? 1 / stock.pe : 0
+    const roc = (stock.roe || 0) / 100
+    return ey + roc
+  }
+
   useEffect(() => {
-    const data = B3_STOCKS.map(s => ({ ...s, ...generateMockQuote(s.ticker) }))
-    setStocks(data)
-    setSelected(data[0])
+    const data = B3_STOCKS.map((s) => {
+      const q = generateMockQuote(s.ticker)
+      return { ...s, ...q }
+    })
+    // Magic Formula ranking
+    const sorted = [...data].sort((a, b) => calcMagicScore(b) - calcMagicScore(a))
+    const ranked = data.map((s) => ({ ...s, magicRank: sorted.findIndex((x) => x.ticker === s.ticker) + 1 }))
+    setStocks(ranked)
+    setSelected(ranked[0])
   }, [])
 
   const filtered = stocks
@@ -69,6 +88,9 @@ export default function FundamentalsLab() {
                 <div className="text-right">
                   <p className="text-xs font-semibold text-white">P/L {stock.pe?.toFixed(1) || '—'}</p>
                   <p className="text-[10px] text-amber-400">{stock.dividendYield?.toFixed(1) || '0'}% DY</p>
+                  {stock.magicRank <= 10 && (
+                    <p className="text-[9px] text-[#FFB800] font-bold">MF #{stock.magicRank}</p>
+                  )}
                 </div>
               </div>
             ))}
@@ -91,6 +113,32 @@ export default function FundamentalsLab() {
                   </p>
                 </div>
               </div>
+
+              {/* Graham Number banner */}
+              {(() => {
+                const gn = calcGrahamNumber(selected)
+                if (!gn) return null
+                const upside = ((gn - selected.price) / selected.price) * 100
+                return (
+                  <div className={`mb-4 p-3 rounded-xl border flex items-center gap-4 ${upside > 0 ? 'border-[#00FF94]/30 bg-[#00FF94]/5' : 'border-[#FF3B5C]/30 bg-[#FF3B5C]/5'}`}>
+                    <div>
+                      <p className="text-[10px] text-slate-400 uppercase font-semibold">Número de Graham</p>
+                      <p className={`text-xl font-bold num ${upside > 0 ? 'text-[#00FF94]' : 'text-[#FF3B5C]'}`}>R$ {gn.toFixed(2)}</p>
+                    </div>
+                    <div className="flex-1">
+                      <p className={`text-sm font-bold num ${upside > 0 ? 'text-[#00FF94]' : 'text-[#FF3B5C]'}`}>
+                        {upside > 0 ? `+${upside.toFixed(1)}% abaixo do valor intrínseco` : `${upside.toFixed(1)}% acima — sobrevalorizado`}
+                      </p>
+                      <p className="text-[10px] text-slate-500">√(22.5 × LPA × VPA) — Benjamin Graham</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[10px] text-slate-500">Magic Formula</p>
+                      <p className="text-sm font-bold text-[#FFB800] num">#{selected.magicRank || '—'}</p>
+                      <p className="text-[9px] text-slate-600">de {stocks.length} ativos</p>
+                    </div>
+                  </div>
+                )
+              })()}
 
               <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-4">
                 {[

@@ -106,6 +106,11 @@ function runBacktest(historicalData, entrySignal, exitSignal, stopLoss, takeProf
   const totalReturn = ((capital - 10000) / 10000) * 100
   const avgWin = wins.length ? wins.reduce((a, t) => a + t.pnlPct, 0) / wins.length : 0
   const avgLoss = losses.length ? losses.reduce((a, t) => a + t.pnlPct, 0) / losses.length : 0
+  const grossWins = wins.reduce((a, t) => a + t.pnlValue, 0)
+  const grossLosses = Math.abs(losses.reduce((a, t) => a + t.pnlValue, 0))
+  const profitFactor = grossLosses > 0 ? grossWins / grossLosses : grossWins > 0 ? Infinity : 0
+  const payoff = avgLoss !== 0 ? Math.abs(avgWin / avgLoss) : 0
+  const expectancy = (trades.length > 0 ? (wins.length / trades.length) * avgWin + (losses.length / trades.length) * avgLoss : 0)
 
   // Buy & Hold comparison
   const bhReturn = closes.length > 60
@@ -133,6 +138,9 @@ function runBacktest(historicalData, entrySignal, exitSignal, stopLoss, takeProf
     losses: losses.length,
     avgWin: parseFloat(avgWin.toFixed(2)),
     avgLoss: parseFloat(avgLoss.toFixed(2)),
+    profitFactor: parseFloat(profitFactor.toFixed(2)),
+    payoff: parseFloat(payoff.toFixed(2)),
+    expectancy: parseFloat(expectancy.toFixed(2)),
     bhReturn: parseFloat(bhReturn.toFixed(2)),
     annualizedReturn: parseFloat((totalReturn / (historicalData.length / 252) * 0.8).toFixed(2)),
   }
@@ -319,9 +327,9 @@ export default function BacktestCenter() {
                   { label: 'Sharpe Ratio', value: results.sharpe.toFixed(2), color: results.sharpe >= 1 ? '#10B981' : '#F59E0B' },
                   { label: 'Max Drawdown', value: `-${results.maxDrawdown.toFixed(1)}%`, color: '#EF4444' },
                   { label: 'Win Rate', value: `${results.winRate.toFixed(1)}%`, color: results.winRate >= 50 ? '#10B981' : '#F59E0B' },
-                  { label: 'Total Operações', value: results.totalTrades },
-                  { label: 'Ganho Médio', value: formatPercent(results.avgWin), color: '#10B981' },
-                  { label: 'Perda Média', value: formatPercent(results.avgLoss), color: '#EF4444' },
+                  { label: 'Total Operações', value: `${results.wins}W / ${results.losses}L`, sub: `${results.totalTrades} total` },
+                  { label: 'Profit Factor', value: results.profitFactor === Infinity ? '∞' : results.profitFactor.toFixed(2), color: results.profitFactor >= 1.5 ? '#10B981' : results.profitFactor >= 1 ? '#F59E0B' : '#EF4444', sub: '≥1.5 é saudável' },
+                  { label: 'Payoff (G/P)', value: `${results.payoff.toFixed(2)}:1`, color: results.payoff >= 1.5 ? '#10B981' : '#F59E0B', sub: `Expect.: ${formatPercent(results.expectancy)}` },
                 ].map((m) => (
                   <div key={m.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-3">
                     <p className="text-[10px] text-slate-500 uppercase font-medium">{m.label}</p>
@@ -373,25 +381,32 @@ export default function BacktestCenter() {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-[10px] text-slate-500 border-b border-[#1A2230] uppercase">
+                          <th className="text-left px-4 py-2">#</th>
                           <th className="text-left px-4 py-2">Entrada</th>
                           <th className="text-left px-4 py-2">Saída</th>
+                          <th className="text-right px-4 py-2">Dias</th>
                           <th className="text-right px-4 py-2">Entrada R$</th>
                           <th className="text-right px-4 py-2">Saída R$</th>
                           <th className="text-right px-4 py-2">Resultado</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#1A2230]/40">
-                        {results.trades.map((t, i) => (
-                          <tr key={i} className="hover:bg-[#0E141F]">
-                            <td className="px-4 py-1.5 text-slate-400">{t.entryDate}</td>
-                            <td className="px-4 py-1.5 text-slate-400">{t.exitDate}</td>
-                            <td className="px-4 py-1.5 text-right text-white tabular-nums">{t.entryPrice.toFixed(2)}</td>
-                            <td className="px-4 py-1.5 text-right text-white tabular-nums">{t.exitPrice.toFixed(2)}</td>
-                            <td className={`px-4 py-1.5 text-right font-semibold tabular-nums ${t.pnlPct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                              {formatPercent(t.pnlPct)}
-                            </td>
-                          </tr>
-                        ))}
+                        {results.trades.map((t, i) => {
+                          const days = Math.round((new Date(t.exitDate) - new Date(t.entryDate)) / 86400000)
+                          return (
+                            <tr key={i} className="hover:bg-[#0E141F]">
+                              <td className="px-4 py-1.5 text-slate-600 tabular-nums text-[10px]">{i + 1}</td>
+                              <td className="px-4 py-1.5 text-slate-400">{t.entryDate}</td>
+                              <td className="px-4 py-1.5 text-slate-400">{t.exitDate}</td>
+                              <td className="px-4 py-1.5 text-right text-slate-400 tabular-nums">{days}d</td>
+                              <td className="px-4 py-1.5 text-right text-white tabular-nums">{t.entryPrice.toFixed(2)}</td>
+                              <td className="px-4 py-1.5 text-right text-white tabular-nums">{t.exitPrice.toFixed(2)}</td>
+                              <td className={`px-4 py-1.5 text-right font-semibold tabular-nums ${t.pnlPct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {formatPercent(t.pnlPct)}
+                              </td>
+                            </tr>
+                          )
+                        })}
                       </tbody>
                     </table>
                   </div>
