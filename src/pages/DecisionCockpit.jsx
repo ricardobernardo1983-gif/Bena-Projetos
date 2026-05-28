@@ -2,13 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Crosshair, Search, TrendingUp, TrendingDown, Target, ShieldAlert,
-  Zap, Brain, ArrowRight, Activity, ChevronDown
+  Zap, Brain, ArrowRight, Activity, ChevronDown, BarChart2
 } from 'lucide-react'
 import {
-  ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceArea
+  ComposedChart, Area, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceArea
 } from 'recharts'
 import ReactMarkdown from 'react-markdown'
 import { Button } from '@/components/ui/button'
+import { useSearchParams } from 'react-router-dom'
 import ConvictionGauge from '@/components/ConvictionGauge'
 import DataSourceBadge from '@/components/DataSourceBadge'
 import InfoTooltip from '@/components/InfoTooltip'
@@ -17,13 +18,15 @@ import { getStockData } from '@/lib/marketData'
 import { buildThesis } from '@/lib/decisionEngine'
 import { getActiveProfile, getProfileCore } from '@/lib/profile'
 import { analyzeStock } from '@/api/claudeAI'
-import { formatPercent, getChangeColor } from '@/lib/utils'
+import { formatPercent, formatVolume, getChangeColor } from '@/lib/utils'
 import { toast } from 'sonner'
 
 export default function DecisionCockpit() {
   const profile = useMemo(() => getActiveProfile(), [])
   const coreChips = useMemo(() => getProfileCore(profile.risk_profile), [profile])
-  const [ticker, setTicker] = useState(coreChips[0] || 'PETR4')
+  const [searchParams] = useSearchParams()
+  const urlTicker = searchParams.get('ticker')
+  const [ticker, setTicker] = useState(urlTicker || coreChips[0] || 'PETR4')
   const [search, setSearch] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const [aiThesis, setAiThesis] = useState(null)
@@ -48,8 +51,15 @@ export default function DecisionCockpit() {
 
   const chartData = useMemo(() => {
     if (!stock?.historicalData) return []
-    return stock.historicalData.slice(-90).map((d) => ({ date: d.date, close: d.close }))
+    const data = stock.historicalData.slice(-90)
+    const maxVol = Math.max(...data.map((d) => d.volume || 0))
+    return data.map((d) => ({ date: d.date, close: d.close, volume: d.volume || 0, volNorm: maxVol > 0 ? (d.volume || 0) / maxVol : 0 }))
   }, [stock])
+
+  // Auto-generate demo thesis when stock loads
+  useEffect(() => {
+    if (thesis && !aiThesis && !loadingAI) generateAI()
+  }, [thesis])
 
   const suggestions = B3_STOCKS.filter(
     (s) => search && (s.ticker.includes(search.toUpperCase()) || s.name.toLowerCase().includes(search.toLowerCase()))
@@ -236,6 +246,7 @@ export default function DecisionCockpit() {
                 <span className="flex items-center gap-1 text-[#00FF94]"><span className="w-2 h-0.5 bg-[#00FF94] inline-block" /> Alvos</span>
                 <span className="flex items-center gap-1 text-[#06E5D4]"><span className="w-2 h-0.5 bg-[#06E5D4] inline-block" /> Entrada</span>
                 <span className="flex items-center gap-1 text-[#FF3B5C]"><span className="w-2 h-0.5 bg-[#FF3B5C] inline-block" /> Stop</span>
+                <span className="flex items-center gap-1 text-[#1A2230]"><span className="w-2 h-2 bg-[#232E40] inline-block" /> Volume</span>
               </div>
             </div>
             <ResponsiveContainer width="100%" height={300}>
@@ -247,24 +258,26 @@ export default function DecisionCockpit() {
                   </linearGradient>
                 </defs>
                 {/* Entry zone band */}
-                <ReferenceArea y1={thesis.zones.entryLow} y2={thesis.zones.entryHigh} fill="#06E5D4" fillOpacity={0.06} />
+                <ReferenceArea yAxisId="price" y1={thesis.zones.entryLow} y2={thesis.zones.entryHigh} fill="#06E5D4" fillOpacity={0.06} />
                 <XAxis dataKey="date" tick={false} axisLine={false} tickLine={false} />
-                <YAxis domain={[yMin, yMax]} tick={{ fontSize: 10, fill: '#4A5568', fontFamily: 'JetBrains Mono' }}
+                <YAxis yAxisId="price" domain={[yMin, yMax]} tick={{ fontSize: 10, fill: '#4A5568', fontFamily: 'JetBrains Mono' }}
                   axisLine={false} tickLine={false} width={48} tickFormatter={(v) => v.toFixed(0)} orientation="right" />
+                <YAxis yAxisId="vol" orientation="left" tick={false} axisLine={false} tickLine={false} width={0} domain={[0, 3]} />
                 <Tooltip
                   contentStyle={{ background: '#0A0E18', border: '1px solid #232E40', borderRadius: 8, fontSize: 12 }}
                   labelStyle={{ color: '#8B98A8' }}
-                  formatter={(v) => [`R$ ${v.toFixed(2)}`, 'Preço']}
+                  formatter={(v, name) => name === 'close' ? [`R$ ${v.toFixed(2)}`, 'Preço'] : [v.toLocaleString('pt-BR'), 'Volume']}
                 />
-                <ReferenceLine y={thesis.zones.target2} stroke="#00FF94" strokeDasharray="2 3" strokeOpacity={0.7}
+                <Bar yAxisId="vol" dataKey="volume" fill="#1A2230" opacity={0.7} />
+                <ReferenceLine yAxisId="price" y={thesis.zones.target2} stroke="#00FF94" strokeDasharray="2 3" strokeOpacity={0.7}
                   label={{ value: `T2 ${thesis.zones.target2.toFixed(2)}`, fill: '#00FF94', fontSize: 9, position: 'insideRight' }} />
-                <ReferenceLine y={thesis.zones.target1} stroke="#16C784" strokeDasharray="2 3" strokeOpacity={0.7}
+                <ReferenceLine yAxisId="price" y={thesis.zones.target1} stroke="#16C784" strokeDasharray="2 3" strokeOpacity={0.7}
                   label={{ value: `T1 ${thesis.zones.target1.toFixed(2)}`, fill: '#16C784', fontSize: 9, position: 'insideRight' }} />
-                <ReferenceLine y={price} stroke="#E6EDF3" strokeDasharray="4 2" strokeOpacity={0.5}
+                <ReferenceLine yAxisId="price" y={price} stroke="#E6EDF3" strokeDasharray="4 2" strokeOpacity={0.5}
                   label={{ value: `${price.toFixed(2)}`, fill: '#E6EDF3', fontSize: 9, position: 'insideRight' }} />
-                <ReferenceLine y={thesis.zones.stop} stroke="#FF3B5C" strokeDasharray="2 3" strokeOpacity={0.7}
+                <ReferenceLine yAxisId="price" y={thesis.zones.stop} stroke="#FF3B5C" strokeDasharray="2 3" strokeOpacity={0.7}
                   label={{ value: `Stop ${thesis.zones.stop.toFixed(2)}`, fill: '#FF3B5C', fontSize: 9, position: 'insideRight' }} />
-                <Area type="monotone" dataKey="close" stroke="#06E5D4" strokeWidth={2} fill="url(#cockpitArea)" dot={false} />
+                <Area yAxisId="price" type="monotone" dataKey="close" stroke="#06E5D4" strokeWidth={2} fill="url(#cockpitArea)" dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
 

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   TrendingUp, TrendingDown, Brain, Crosshair, Radar, Dices,
-  ArrowRight, Activity, Zap, Bell, Wallet, ArrowUpRight
+  ArrowRight, Activity, Zap, Bell, Wallet, ArrowUpRight, Calendar
 } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,17 @@ import { calculateNexusScore } from '@/lib/nexusScore'
 import { getActiveProfile, getProfileCore } from '@/lib/profile'
 import { getCachedStockData, warmCore } from '@/lib/marketData'
 import { formatCurrency, formatPercent, getChangeColor, getNexusScoreColor } from '@/lib/utils'
+
+const ECON_CALENDAR = [
+  { date: '2026-06-04', type: 'macro', label: 'IPCA Maio', detail: 'Projeção: +0.38%', color: '#A855F7' },
+  { date: '2026-06-11', type: 'dividendo', label: 'TAEE11 Ex-DY', detail: 'DY est.: 1.9%', color: '#00FF94' },
+  { date: '2026-06-12', type: 'earnings', label: 'PETR4 Resultados', detail: '1T26 — est. R$1,28/ação', color: '#06E5D4' },
+  { date: '2026-06-17', type: 'copom', label: 'Reunião COPOM', detail: 'Decisão da Selic', color: '#FFB800' },
+  { date: '2026-06-19', type: 'earnings', label: 'VALE3 Resultados', detail: '1T26 — est. USD 2,50/ação', color: '#06E5D4' },
+  { date: '2026-06-25', type: 'dividendo', label: 'BBAS3 Ex-DY', detail: 'DY est.: 2.3%', color: '#00FF94' },
+]
+
+const TYPE_ICON = { copom: '🏦', earnings: '📊', dividendo: '💰', macro: '📈' }
 
 const FLAGSHIPS = [
   { to: '/cockpit', icon: Crosshair, title: 'Decision Cockpit', desc: 'Tese IA + cenários + plano de trade', color: '#06E5D4' },
@@ -195,9 +206,41 @@ export default function Dashboard() {
         </div>
 
         {/* Bottom grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Top NEXUS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Economic calendar */}
           <div className="term-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#FFB800]" /> Calendário Econômico
+              </h3>
+            </div>
+            <div className="space-y-1.5">
+              {ECON_CALENDAR.map((ev, i) => {
+                const d = new Date(ev.date)
+                const day = d.getDate()
+                const month = d.toLocaleString('pt-BR', { month: 'short' })
+                return (
+                  <div key={i} className="flex items-center gap-2.5 p-2 rounded-lg bg-[#0E141F] border border-[#1A2230]">
+                    <div className="w-9 h-9 rounded-md flex flex-col items-center justify-center shrink-0"
+                      style={{ background: `${ev.color}15`, border: `1px solid ${ev.color}30` }}>
+                      <span className="text-[9px] font-bold" style={{ color: ev.color }}>{month.toUpperCase()}</span>
+                      <span className="text-sm font-bold text-white num leading-none">{day}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[9px]">{TYPE_ICON[ev.type]}</span>
+                        <span className="text-xs font-semibold text-white truncate">{ev.label}</span>
+                      </div>
+                      <p className="text-[10px] text-[#8B98A8] truncate">{ev.detail}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Top NEXUS */}
+          <div className="term-card p-4 lg:col-span-1">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                 <Brain className="w-4 h-4 text-[#06E5D4]" /> Maiores NEXUS Score <InfoTooltip term="nexus" iconSize={11} />
@@ -208,7 +251,7 @@ export default function Dashboard() {
               {topOpps.map((s) => {
                 const c = getNexusScoreColor(s.nexus.score)
                 return (
-                  <Link to="/cockpit" key={s.ticker}>
+                  <Link to={`/cockpit?ticker=${s.ticker}`} key={s.ticker}>
                     <div className="flex items-center gap-3 p-2 rounded-lg bg-[#0E141F] border border-[#1A2230] hover:border-[#232E40] transition-colors">
                       <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 num font-bold text-sm"
                         style={{ background: `${c}15`, border: `1px solid ${c}40`, color: c }}>{s.nexus.score}</div>

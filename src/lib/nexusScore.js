@@ -110,7 +110,8 @@ export function calcATR(highs, lows, closes, period = 14) {
 
 /* ─── Technical Score (0-100) ───────────────────────────────── */
 function calcTechnicalScore(historicalData) {
-  if (!historicalData || historicalData.length < 50) return 50
+  if (!historicalData || historicalData.length < 50)
+    return { score: 50, signals: [], rsi: 50, sma20: null, sma50: null, sma200: null, macd: { macd: 0, signal: 0, histogram: 0 } }
 
   const closes = historicalData.map((d) => d.close)
   const highs = historicalData.map((d) => d.high)

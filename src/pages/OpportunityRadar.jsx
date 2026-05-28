@@ -287,7 +287,7 @@ export default function OpportunityRadar() {
                 </div>
               ))}
             </div>
-            <Button size="sm" onClick={() => navigate('/cockpit')}
+            <Button size="sm" onClick={() => navigate(`/cockpit?ticker=${selected.ticker}`)}
               className="ml-auto bg-[#06E5D4]/10 hover:bg-[#06E5D4]/20 text-[#06E5D4] border border-[#06E5D4]/30 gap-1.5 h-8">
               <Crosshair className="w-3.5 h-3.5" /> Abrir no Cockpit
             </Button>

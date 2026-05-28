@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Zap, TrendingUp, TrendingDown, RefreshCw, Search, Filter, Radio } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +24,7 @@ const PRESETS = [
 ]
 
 export default function MarketScanner() {
+  const navigate = useNavigate()
   const profile = useMemo(() => getActiveProfile(), [])
   const coreSet = useMemo(() => new Set(getProfileCore(profile.risk_profile)), [profile])
   const [allStocks, setAllStocks] = useState([])
@@ -207,7 +209,8 @@ export default function MarketScanner() {
                 const rsi = stock.nexusScore.technical?.rsi
                 const rec = stock.nexusScore.recommendation
                 return (
-                  <tr key={stock.ticker} className="hover:bg-[#0E141F] transition-colors cursor-pointer">
+                  <tr key={stock.ticker} className="hover:bg-[#0E141F] transition-colors cursor-pointer"
+                    onClick={() => navigate(`/cockpit?ticker=${stock.ticker}`)}>
                     <td className="px-4 py-3">
                       <NexusScoreBadge score={stock.nexusScore.score} size="sm" showLabel={false} />
                     </td>
@@ -255,9 +258,9 @@ export default function MarketScanner() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${
                         rec.includes('COMPRA') ? 'signal-buy' : rec.includes('VENDA') ? 'signal-sell' : 'signal-hold'
-                      }`}>
+                      }`} style={{ letterSpacing: '0.02em' }}>
                         {rec}
                       </span>
                     </td>

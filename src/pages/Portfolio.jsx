@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar } from 'recharts'
-import { Plus, Trash2, Edit2, Brain, TrendingUp, TrendingDown, Wallet, Target, Shield } from 'lucide-react'
+import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, ComposedChart, Legend } from 'recharts'
+import { Plus, Trash2, Edit2, Brain, TrendingUp, TrendingDown, Wallet, Target, Shield, Calculator } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import NexusScoreBadge from '@/components/NexusScoreBadge'
@@ -51,9 +51,15 @@ export default function Portfolio() {
     const m = calcPortfolioMetrics(positions, data)
     setMetrics(m)
 
-    // Generate portfolio history
-    const histArr = generateHistoricalData(120, metrics?.totalValue || 100000)
-    setHistData(histArr.map((d) => ({ date: d.date, value: d.close })))
+    // Portfolio history vs IBOV benchmark
+    const totalVal = m?.totalValue || 100000
+    const portHist = generateHistoricalData(180, totalVal)
+    const ibovHist = generateHistoricalData(180, totalVal * 0.97) // IBOV starts ~3% behind
+    setHistData(portHist.map((d, i) => ({
+      date: d.date,
+      carteira: d.close,
+      ibov: ibovHist[i]?.close ?? d.close,
+    })))
   }
 
   async function handleAddPosition() {
@@ -96,6 +102,13 @@ export default function Portfolio() {
       setLoadingAI(false)
     }
   }
+
+  // IR simulation: 15% on realized gains > R$20k/month (swing trade B3 rule)
+  const irSimulation = metrics ? (() => {
+    const realizedGain = metrics.totalPnL > 0 ? metrics.totalPnL : 0
+    const ir = realizedGain > 20000 ? (realizedGain - 20000) * 0.15 : 0
+    return { gain: realizedGain, ir, net: realizedGain - ir }
+  })() : null
 
   const sectorData = metrics?.positions?.reduce((acc, p) => {
     const existing = acc.find((a) => a.name === (p.sector || 'Outros'))
@@ -161,9 +174,15 @@ export default function Portfolio() {
 
       {/* Charts + positions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Portfolio chart */}
+        {/* Portfolio chart vs IBOV */}
         <div className="lg:col-span-2 bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
-          <h3 className="text-sm font-semibold text-white mb-4">Evolução da Carteira</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-white">Evolução da Carteira · 180 dias</h3>
+            <div className="flex items-center gap-3 text-[10px]">
+              <span className="flex items-center gap-1 text-[#10B981]"><span className="w-3 h-0.5 bg-[#10B981] inline-block rounded" /> Carteira</span>
+              <span className="flex items-center gap-1 text-[#475569]"><span className="w-3 h-0.5 bg-[#475569] inline-block rounded" /> IBOV</span>
+            </div>
+          </div>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={histData}>
               <defs>
@@ -177,9 +196,10 @@ export default function Portfolio() {
                 tickFormatter={(v) => `R$${(v/1000).toFixed(0)}K`} width={45} />
               <Tooltip
                 contentStyle={{ background: '#0A0E18', border: '1px solid #1A2230', borderRadius: 8 }}
-                formatter={(v) => [formatCurrency(v), 'Valor']}
+                formatter={(v, name) => [formatCurrency(v), name === 'carteira' ? 'Carteira' : 'IBOV']}
               />
-              <Area type="monotone" dataKey="value" stroke="#10B981" strokeWidth={2} fill="url(#portGrad)" dot={false} />
+              <Area type="monotone" dataKey="ibov" stroke="#475569" strokeWidth={1.5} fill="none" dot={false} strokeDasharray="3 3" />
+              <Area type="monotone" dataKey="carteira" stroke="#10B981" strokeWidth={2} fill="url(#portGrad)" dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -242,8 +262,9 @@ export default function Portfolio() {
                 const pnl = pos.quantity * (currentPrice - pos.avgPrice)
                 const pnlPct = ((currentPrice - pos.avgPrice) / pos.avgPrice) * 100
                 const weight = metrics ? (posValue / metrics.totalValue) * 100 : 0
-                const hist = generateHistoricalData(60, currentPrice)
+                const hist = generateHistoricalData(120, currentPrice)
                 const nexus = calculateNexusScore({ historicalData: hist, fundamentals: q || {} })
+                const nexusScore = Number.isFinite(nexus?.score) ? nexus.score : null
 
                 return (
                   <tr key={pos.ticker} className="hover:bg-[#0E141F] transition-colors">
@@ -263,7 +284,9 @@ export default function Portfolio() {
                     </td>
                     <td className="px-4 py-3 text-right text-slate-400 tabular-nums">{weight.toFixed(1)}%</td>
                     <td className="px-4 py-3 text-center">
-                      <NexusScoreBadge score={nexus.score} size="sm" showLabel={false} />
+                      {nexusScore !== null
+                        ? <NexusScoreBadge score={nexusScore} size="sm" showLabel={false} />
+                        : <span className="text-[#4A5568] text-xs num">—</span>}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
@@ -292,6 +315,32 @@ export default function Portfolio() {
           </div>
           <div className="text-sm text-slate-300 leading-relaxed prose prose-invert prose-sm max-w-none">
             <ReactMarkdown>{aiOpt}</ReactMarkdown>
+          </div>
+        </div>
+      )}
+
+      {/* IR Simulation */}
+      {irSimulation && irSimulation.gain > 0 && (
+        <div className="bg-[#0A0E18] border border-[#FFB800]/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Calculator className="w-4 h-4 text-[#FFB800]" />
+            <h3 className="text-sm font-semibold text-white">Simulação de IR — Se vender hoje</h3>
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#FFB800]/10 text-[#FFB800] border border-[#FFB800]/30 font-bold">ESTIMATIVA</span>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <p className="text-xs text-slate-500 mb-0.5">Ganho não realizado</p>
+              <p className="text-lg font-bold text-[#00FF94] num">{formatCurrency(irSimulation.gain)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-0.5">IR estimado (15%)</p>
+              <p className="text-lg font-bold text-[#FF3B5C] num">{formatCurrency(irSimulation.ir)}</p>
+              <p className="text-[10px] text-slate-600">{irSimulation.ir === 0 ? 'Isento (ganho ≤ R$20k)' : 'Swing trade — 15% s/ ganho >R$20k'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 mb-0.5">Resultado líquido</p>
+              <p className="text-lg font-bold text-white num">{formatCurrency(irSimulation.net)}</p>
+            </div>
           </div>
         </div>
       )}
