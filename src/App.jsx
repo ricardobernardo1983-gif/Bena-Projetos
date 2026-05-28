@@ -24,6 +24,11 @@ import TraderJournal from './pages/TraderJournal'
 import Plans from './pages/Plans'
 import UserProfile from './pages/UserProfile'
 import AdminPanel from './pages/AdminPanel'
+import PositionSizing from './pages/PositionSizing'
+import OptionsCalc from './pages/OptionsCalc'
+import StockComparator from './pages/StockComparator'
+import SetupDetector from './pages/SetupDetector'
+import IRTracker from './pages/IRTracker'
 
 function PageWrapper({ children }) {
   return (
@@ -68,6 +73,11 @@ export default function App() {
         <Route path="/plans" element={<PageWrapper><Plans /></PageWrapper>} />
         <Route path="/profile" element={<PageWrapper><UserProfile /></PageWrapper>} />
         <Route path="/admin" element={<PageWrapper><AdminPanel /></PageWrapper>} />
+        <Route path="/position-sizing" element={<PageWrapper><PositionSizing /></PageWrapper>} />
+        <Route path="/options" element={<PageWrapper><OptionsCalc /></PageWrapper>} />
+        <Route path="/comparator" element={<PageWrapper><StockComparator /></PageWrapper>} />
+        <Route path="/setups" element={<PageWrapper><SetupDetector /></PageWrapper>} />
+        <Route path="/ir-tracker" element={<PageWrapper><IRTracker /></PageWrapper>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>

@@ -6,7 +6,7 @@ import {
   Crown, Menu, X, Activity, BookOpen, Building2,
   Target, Users, MessageSquare, Settings, Wallet, Zap,
   DollarSign, PieChart, LineChart, FlaskConical, Crosshair,
-  Radar, Dices
+  Radar, Dices, Calculator, Percent, GitCompare, ScanSearch, Receipt
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,6 +34,12 @@ const NAV_ITEMS = [
   { label: 'Gestão de Risco', page: '/risk', icon: Shield, description: 'VaR e correlações' },
   { label: 'Watchlist & Alertas', page: '/watchlist', icon: Star, description: 'Monitoramento' },
   { label: 'Diário do Trader', page: '/journal', icon: BookOpen, description: 'Registro de operações' },
+  { section: 'FERRAMENTAS' },
+  { label: 'Position Sizing', page: '/position-sizing', icon: Calculator, description: 'Tamanho de posição' },
+  { label: 'Detector de Setups', page: '/setups', icon: ScanSearch, description: 'Padrões técnicos B3' },
+  { label: 'Comparador de Ativos', page: '/comparator', icon: GitCompare, description: 'Base 100 relativo' },
+  { label: 'Calculadora de Opções', page: '/options', icon: Percent, description: 'Black-Scholes + Greeks' },
+  { label: 'Tracker de IR', page: '/ir-tracker', icon: Receipt, description: 'Controle de imposto' },
   { section: 'OUTROS' },
   { label: 'Assistente IA', page: '/ai-assistant', icon: MessageSquare, description: 'Chat inteligente' },
 ]
