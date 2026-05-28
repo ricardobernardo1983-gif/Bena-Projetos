@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Brain, Send, RefreshCw, User, Bot, Sparkles } from 'lucide-react'
+import { Brain, Send, RefreshCw, User, Bot, Sparkles, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import ReactMarkdown from 'react-markdown'
 import { chatWithNexus } from '@/api/claudeAI'
+import { loadPositions } from '@/lib/userData'
+import { generateMockQuote } from '@/lib/mockData'
 import { toast } from 'sonner'
 
 const QUICK_PROMPTS = [
@@ -48,6 +50,25 @@ function Message({ msg }) {
 }
 
 export default function AIAssistant() {
+  const [portfolio, setPortfolio] = useState([])
+
+  useEffect(() => {
+    loadPositions().then((positions) => {
+      if (positions && positions.length > 0) setPortfolio(positions)
+    })
+  }, [])
+
+  function buildPortfolioContext(positions) {
+    if (!positions.length) return ''
+    const total = positions.reduce((s, p) => s + p.quantity * p.avgPrice, 0)
+    const pos = positions.map((p) => {
+      const q = generateMockQuote(p.ticker)
+      const pnl = ((q.price - p.avgPrice) / p.avgPrice * 100).toFixed(1)
+      return `${p.ticker} (${p.sector || 'sem setor'}): ${p.quantity} ações @ R$${p.avgPrice.toFixed(2)}, atual R$${q.price.toFixed(2)} (${pnl > 0 ? '+' : ''}${pnl}%)`
+    }).join('; ')
+    return `\n\n---\n**[CARTEIRA DO USUÁRIO]** Capital investido: R$${total.toFixed(2)}. Posições: ${pos}\n---`
+  }
+
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -75,9 +96,27 @@ Como posso ajudar você hoje?`,
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  function sendPortfolioAnalysis() {
+    if (!portfolio.length) {
+      sendMessage('Não tenho posições cadastradas. Como montar uma carteira equilibrada de R$ 50.000 para perfil moderado?')
+      return
+    }
+    sendMessage(`Analise minha carteira atual e me dê recomendações de ajuste, diversificação e riscos:${buildPortfolioContext(portfolio)}`)
+  }
+
   async function sendMessage(content = input) {
     if (!content.trim()) return
-    const userMsg = { role: 'user', content: content.trim() }
+    let msgContent = content.trim()
+    // Append portfolio context when user asks about their portfolio
+    if (portfolio.length > 0) {
+      const lc = msgContent.toLowerCase()
+      if (lc.includes('minha carteira') || lc.includes('minha posição') || lc.includes('meus ativos') || lc.includes('[carteira do usuário]')) {
+        if (!msgContent.includes('[CARTEIRA DO USUÁRIO]')) {
+          msgContent += buildPortfolioContext(portfolio)
+        }
+      }
+    }
+    const userMsg = { role: 'user', content: msgContent }
     const newMessages = [...messages, userMsg]
     setMessages(newMessages)
     setInput('')
@@ -163,6 +202,17 @@ Como posso ajudar você hoje?`,
 
       {/* Quick prompts */}
       <div className="px-4 py-2 border-t border-[#1A2230] flex gap-2 overflow-x-auto shrink-0 bg-[#070A12]">
+        {/* Portfolio analysis button (highlighted) */}
+        <button
+          onClick={sendPortfolioAnalysis}
+          disabled={loading}
+          className="shrink-0 text-xs px-3 py-1.5 rounded-full font-semibold transition-colors flex items-center gap-1.5"
+          style={{ background: '#A855F715', border: '1px solid #A855F730', color: '#A855F7' }}
+        >
+          <Wallet className="w-3 h-3" />
+          {portfolio.length > 0 ? `Analisar minha carteira (${portfolio.length} ativos)` : 'Montar carteira'}
+        </button>
+        <div className="w-px bg-[#1A2230] self-stretch shrink-0" />
         {QUICK_PROMPTS.map((q, i) => (
           <button
             key={i}

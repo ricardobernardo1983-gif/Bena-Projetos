@@ -34,15 +34,26 @@ function HeatCell({ stock, onClick }) {
   )
 }
 
+const PERIOD_LABELS = { '1d': '1 Dia', '1w': '1 Sem.', '1m': '1 Mês', '3m': '3 Meses' }
+const PERIOD_MULT  = { '1d': 1, '1w': 4.5, '1m': 18, '3m': 52 }
+
 export default function SectorMap() {
+  const [baseStocks, setBaseStocks] = useState([])
   const [stocks, setStocks] = useState([])
   const [selected, setSelected] = useState(null)
-  const [viewMode, setViewMode] = useState('heatmap') // heatmap | sector
+  const [viewMode, setViewMode] = useState('heatmap')
+  const [period, setPeriod] = useState('1d')
 
   useEffect(() => {
-    const data = B3_STOCKS.map(s => ({ ...s, ...generateMockQuote(s.ticker) }))
-    setStocks(data)
+    const data = B3_STOCKS.map((s) => ({ ...s, ...generateMockQuote(s.ticker) }))
+    setBaseStocks(data)
   }, [])
+
+  useEffect(() => {
+    if (!baseStocks.length) return
+    const mult = PERIOD_MULT[period]
+    setStocks(baseStocks.map((s) => ({ ...s, changePercent: parseFloat((s.changePercent * mult).toFixed(2)) })))
+  }, [baseStocks, period])
 
   const sectors = [...new Set(stocks.map(s => s.sector))].sort()
   const sectorStats = sectors.map(sec => {
@@ -61,8 +72,19 @@ export default function SectorMap() {
           </h1>
           <p className="text-slate-400 text-sm">Heat map da Bolsa — performance por setor e ação</p>
         </div>
-        <div className="flex gap-1">
-          {['heatmap', 'sector'].map(m => (
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 bg-[#0A0E18] border border-[#1A2230] rounded-lg p-0.5">
+            {Object.keys(PERIOD_LABELS).map((p) => (
+              <button key={p} onClick={() => setPeriod(p)}
+                className={`text-xs px-2.5 py-1 rounded-md font-medium transition-colors ${
+                  period === p ? 'bg-[#FFB800] text-[#05070D]' : 'text-slate-400 hover:text-slate-300'
+                }`}>
+                {PERIOD_LABELS[p]}
+              </button>
+            ))}
+          </div>
+          <div className="w-px h-5 bg-[#1A2230]" />
+          {['heatmap', 'sector'].map((m) => (
             <button key={m} onClick={() => setViewMode(m)}
               className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
                 viewMode === m ? 'bg-[#06E5D4] text-white border-[#06E5D4]' : 'bg-[#0A0E18] text-slate-400 border-[#1A2230]'

@@ -12,6 +12,7 @@ export default function FIICenter() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('Todos')
   const [sortBy, setSortBy] = useState('dy')
+  const [onlyDiscount, setOnlyDiscount] = useState(false)
 
   useEffect(() => {
     const data = FII_LIST.map(fii => {
@@ -35,6 +36,7 @@ export default function FIICenter() {
   const filtered = fiis
     .filter(f => !search || f.ticker.includes(search.toUpperCase()) || f.name.toLowerCase().includes(search.toLowerCase()))
     .filter(f => typeFilter === 'Todos' || f.type === typeFilter)
+    .filter(f => !onlyDiscount || f.pvp < 1)
     .sort((a, b) => {
       if (sortBy === 'dy') return b.dividendYield - a.dividendYield
       if (sortBy === 'pvp') return a.pvp - b.pvp
@@ -44,6 +46,8 @@ export default function FIICenter() {
 
   const avgDY = fiis.length ? fiis.reduce((s, f) => s + f.dividendYield, 0) / fiis.length : 0
   const bestDY = fiis.length ? Math.max(...fiis.map(f => f.dividendYield)) : 0
+  const discountCount = fiis.filter(f => f.pvp < 1).length
+  const IFIX_RETURN_12M = 8.3
 
   return (
     <div className="p-6 max-w-screen-xl mx-auto space-y-6">
@@ -53,17 +57,18 @@ export default function FIICenter() {
             <Building2 className="w-6 h-6 text-cyan-400" />
             Centro de FIIs
           </h1>
-          <p className="text-slate-400 text-sm">Fundos de Investimento Imobiliário da B3</p>
+          <p className="text-slate-400 text-sm">Fundos de Investimento Imobiliário da B3 — {discountCount} FIIs com desconto (P/VP {"< 1"})</p>
         </div>
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
           { label: 'FIIs na Lista', value: fiis.length, sub: 'analisados', color: '#06B6D4' },
           { label: 'DY Médio', value: `${avgDY.toFixed(2)}%`, sub: 'ao ano', color: '#F59E0B' },
           { label: 'Maior DY', value: `${bestDY.toFixed(2)}%`, sub: filtered[0]?.ticker || '—', color: '#10B981' },
           { label: 'P/VP Médio', value: fiis.length ? (fiis.reduce((s,f) => s + f.pvp, 0) / fiis.length).toFixed(2) : '—', sub: '<1 = desconto', color: '#8B5CF6' },
+          { label: 'IFIX 12M', value: `+${IFIX_RETURN_12M}%`, sub: `DY médio ${avgDY.toFixed(1)}% ${avgDY > IFIX_RETURN_12M ? '↑ supera IFIX' : '↓ abaixo IFIX'}`, color: avgDY > IFIX_RETURN_12M ? '#00FF94' : '#FFB800' },
         ].map(card => (
           <div key={card.label} className="bg-[#0A0E18] border border-[#1A2230] rounded-xl p-4">
             <p className="text-xs text-slate-500 uppercase font-medium">{card.label}</p>
@@ -109,6 +114,12 @@ export default function FIICenter() {
               </button>
             ))}
           </div>
+          <button onClick={() => setOnlyDiscount(!onlyDiscount)}
+            className={`text-xs px-3 py-1.5 rounded-md border font-semibold transition-colors flex items-center gap-1 ${
+              onlyDiscount ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-[#0E141F] text-slate-400 border-[#1A2230] hover:border-emerald-700'
+            }`}>
+            P/VP {'< 1'} — Desconto {discountCount > 0 && <span className="text-[9px] font-bold px-1 rounded bg-white/20">{discountCount}</span>}
+          </button>
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
             className="text-xs bg-[#0E141F] border border-[#1A2230] text-slate-300 rounded-md px-2 py-1">
             <option value="dy">Maior DY</option>
