@@ -1,67 +1,90 @@
 /* Realistic mock data for B3 stocks — used when API is unavailable */
 
+/* Reference prices (approximate market values) — used to anchor mock quotes realistically */
+export const TICKER_BASE_PRICES = {
+  ITUB4: 35.80, BBDC4: 14.20, BBAS3: 27.50, SANB11: 32.00, BPAC11: 88.00,
+  IRBR3: 3.80,  SULA11: 45.00,
+  VALE3: 62.00, CSNA3: 12.50, GGBR4: 18.40, USIM5: 7.20, BRAP4: 21.00,
+  PETR4: 38.50, PETR3: 40.20, PRIO3: 48.00, RRRP3: 22.00, CSAN3: 17.50,
+  ELET3: 44.00, ELET6: 43.50, ENEV3: 16.80, CPFE3: 36.00, ENGI11: 45.00, TAEE11: 11.50,
+  WEGE3: 52.00, ABEV3: 12.80, JBSS3: 28.00, MRFG3: 14.50, BRFS3: 21.00, MDIA3: 32.00,
+  MGLU3: 8.50,  VIIA3: 6.20,  PCAR3: 5.80,  LREN3: 18.00, ARZZ3: 68.00, SOMA3: 7.40,
+  VIVT3: 54.00, TIMS3: 17.50, TOTVS3: 36.00, LWSA3: 5.20, INTB3: 32.00,
+  RDOR3: 28.00, HAPV3: 4.20,  FLRY3: 16.50, DASA3: 3.80,
+  CYRE3: 21.00, EZTC3: 18.00, MRVE3: 9.80,  EVEN3: 8.50,
+  RAIL3: 22.00, AZUL4: 12.00, GOLL4: 5.50,  CCRO3: 16.00,
+  KLBN11: 22.00, SUZB3: 58.00, EMBR3: 52.00, RENT3: 55.00, MULT3: 26.00,
+}
+
 export const B3_STOCKS = [
   // Financials
-  { ticker: 'ITUB4', name: 'Itaú Unibanco', sector: 'Financeiro', subsector: 'Bancos' },
-  { ticker: 'BBDC4', name: 'Bradesco', sector: 'Financeiro', subsector: 'Bancos' },
-  { ticker: 'BBAS3', name: 'Banco do Brasil', sector: 'Financeiro', subsector: 'Bancos' },
-  { ticker: 'SANB11', name: 'Santander Brasil', sector: 'Financeiro', subsector: 'Bancos' },
-  { ticker: 'BPAC11', name: 'BTG Pactual', sector: 'Financeiro', subsector: 'Bancos' },
-  { ticker: 'IRBR3', name: 'IRB Brasil RE', sector: 'Financeiro', subsector: 'Seguros' },
-  { ticker: 'SULA11', name: 'SulAmérica', sector: 'Financeiro', subsector: 'Seguros' },
+  { ticker: 'ITUB4',  name: 'Itaú Unibanco',      sector: 'Financeiro',       subsector: 'Bancos' },
+  { ticker: 'BBDC4',  name: 'Bradesco',             sector: 'Financeiro',       subsector: 'Bancos' },
+  { ticker: 'BBAS3',  name: 'Banco do Brasil',      sector: 'Financeiro',       subsector: 'Bancos' },
+  { ticker: 'SANB11', name: 'Santander Brasil',     sector: 'Financeiro',       subsector: 'Bancos' },
+  { ticker: 'BPAC11', name: 'BTG Pactual',          sector: 'Financeiro',       subsector: 'Bancos' },
+  { ticker: 'IRBR3',  name: 'IRB Brasil RE',        sector: 'Financeiro',       subsector: 'Seguros' },
+  { ticker: 'SULA11', name: 'SulAmérica',           sector: 'Financeiro',       subsector: 'Seguros' },
   // Commodities
-  { ticker: 'VALE3', name: 'Vale', sector: 'Materiais Básicos', subsector: 'Mineração' },
-  { ticker: 'CSNA3', name: 'CSN', sector: 'Materiais Básicos', subsector: 'Siderurgia' },
-  { ticker: 'GGBR4', name: 'Gerdau', sector: 'Materiais Básicos', subsector: 'Siderurgia' },
-  { ticker: 'USIM5', name: 'Usiminas', sector: 'Materiais Básicos', subsector: 'Siderurgia' },
-  { ticker: 'BRAP4', name: 'Bradespar', sector: 'Materiais Básicos', subsector: 'Mineração' },
+  { ticker: 'VALE3',  name: 'Vale',                 sector: 'Materiais Básicos', subsector: 'Mineração' },
+  { ticker: 'CSNA3',  name: 'CSN',                  sector: 'Materiais Básicos', subsector: 'Siderurgia' },
+  { ticker: 'GGBR4',  name: 'Gerdau',              sector: 'Materiais Básicos', subsector: 'Siderurgia' },
+  { ticker: 'USIM5',  name: 'Usiminas',             sector: 'Materiais Básicos', subsector: 'Siderurgia' },
+  { ticker: 'BRAP4',  name: 'Bradespar',            sector: 'Materiais Básicos', subsector: 'Mineração' },
+  { ticker: 'KLBN11', name: 'Klabin',               sector: 'Materiais Básicos', subsector: 'Papel e Celulose' },
+  { ticker: 'SUZB3',  name: 'Suzano',               sector: 'Materiais Básicos', subsector: 'Papel e Celulose' },
   // Energy
-  { ticker: 'PETR4', name: 'Petrobras', sector: 'Petróleo e Gás', subsector: 'Exploração' },
-  { ticker: 'PETR3', name: 'Petrobras ON', sector: 'Petróleo e Gás', subsector: 'Exploração' },
-  { ticker: 'PRIO3', name: 'PetroRio', sector: 'Petróleo e Gás', subsector: 'Exploração' },
-  { ticker: 'RRRP3', name: '3R Petroleum', sector: 'Petróleo e Gás', subsector: 'Exploração' },
-  { ticker: 'CSAN3', name: 'Cosan', sector: 'Petróleo e Gás', subsector: 'Distribuição' },
+  { ticker: 'PETR4',  name: 'Petrobras',            sector: 'Petróleo e Gás',   subsector: 'Exploração' },
+  { ticker: 'PETR3',  name: 'Petrobras ON',         sector: 'Petróleo e Gás',   subsector: 'Exploração' },
+  { ticker: 'PRIO3',  name: 'PetroRio',             sector: 'Petróleo e Gás',   subsector: 'Exploração' },
+  { ticker: 'RRRP3',  name: '3R Petroleum',         sector: 'Petróleo e Gás',   subsector: 'Exploração' },
+  { ticker: 'CSAN3',  name: 'Cosan',                sector: 'Petróleo e Gás',   subsector: 'Distribuição' },
   // Utilities
-  { ticker: 'ELET3', name: 'Eletrobras', sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
-  { ticker: 'ELET6', name: 'Eletrobras PNB', sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
-  { ticker: 'ENEV3', name: 'Eneva', sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
-  { ticker: 'CPFE3', name: 'CPFL Energia', sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
-  { ticker: 'ENGI11', name: 'Energisa', sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
-  { ticker: 'TAEE11', name: 'Taesa', sector: 'Utilidade Pública', subsector: 'Transmissão' },
+  { ticker: 'ELET3',  name: 'Eletrobras',           sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
+  { ticker: 'ELET6',  name: 'Eletrobras PNB',       sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
+  { ticker: 'ENEV3',  name: 'Eneva',                sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
+  { ticker: 'CPFE3',  name: 'CPFL Energia',         sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
+  { ticker: 'ENGI11', name: 'Energisa',             sector: 'Utilidade Pública', subsector: 'Energia Elétrica' },
+  { ticker: 'TAEE11', name: 'Taesa',                sector: 'Utilidade Pública', subsector: 'Transmissão' },
+  // Industrial / Tech — ações mais seguidas
+  { ticker: 'WEGE3',  name: 'WEG',                  sector: 'Tecnologia',        subsector: 'Equipamentos Industriais' },
+  { ticker: 'EMBR3',  name: 'Embraer',              sector: 'Tecnologia',        subsector: 'Aeronáutica' },
+  { ticker: 'TOTVS3', name: 'TOTVS',                sector: 'Tecnologia',        subsector: 'Software' },
+  { ticker: 'LWSA3',  name: 'Locaweb',              sector: 'Tecnologia',        subsector: 'Internet' },
+  { ticker: 'INTB3',  name: 'Intelbras',            sector: 'Tecnologia',        subsector: 'Equipamentos' },
   // Consumer
-  { ticker: 'ABEV3', name: 'Ambev', sector: 'Consumo', subsector: 'Bebidas' },
-  { ticker: 'JBSS3', name: 'JBS', sector: 'Consumo', subsector: 'Alimentos' },
-  { ticker: 'MRFG3', name: 'Marfrig', sector: 'Consumo', subsector: 'Alimentos' },
-  { ticker: 'BRFS3', name: 'BRF', sector: 'Consumo', subsector: 'Alimentos' },
-  { ticker: 'MDIA3', name: 'M.Dias Branco', sector: 'Consumo', subsector: 'Alimentos' },
+  { ticker: 'ABEV3',  name: 'Ambev',                sector: 'Consumo',           subsector: 'Bebidas' },
+  { ticker: 'JBSS3',  name: 'JBS',                  sector: 'Consumo',           subsector: 'Alimentos' },
+  { ticker: 'MRFG3',  name: 'Marfrig',              sector: 'Consumo',           subsector: 'Alimentos' },
+  { ticker: 'BRFS3',  name: 'BRF',                  sector: 'Consumo',           subsector: 'Alimentos' },
+  { ticker: 'MDIA3',  name: 'M.Dias Branco',        sector: 'Consumo',           subsector: 'Alimentos' },
   // Retail
-  { ticker: 'MGLU3', name: 'Magazine Luiza', sector: 'Varejo', subsector: 'Comércio' },
-  { ticker: 'VIIA3', name: 'Via Varejo', sector: 'Varejo', subsector: 'Comércio' },
-  { ticker: 'PCAR3', name: 'GPA', sector: 'Varejo', subsector: 'Supermercados' },
-  { ticker: 'LREN3', name: 'Lojas Renner', sector: 'Varejo', subsector: 'Moda' },
-  { ticker: 'ARZZ3', name: 'Arezzo', sector: 'Varejo', subsector: 'Moda' },
-  { ticker: 'SOMA3', name: 'Grupo Soma', sector: 'Varejo', subsector: 'Moda' },
-  // Telecom / Tech
-  { ticker: 'VIVT3', name: 'Telefônica Vivo', sector: 'Telecom', subsector: 'Telecomunicações' },
-  { ticker: 'TIMS3', name: 'TIM', sector: 'Telecom', subsector: 'Telecomunicações' },
-  { ticker: 'TOTVS3', name: 'TOTVS', sector: 'Tecnologia', subsector: 'Software' },
-  { ticker: 'LWSA3', name: 'Locaweb', sector: 'Tecnologia', subsector: 'Internet' },
-  { ticker: 'INTB3', name: 'Intelbras', sector: 'Tecnologia', subsector: 'Equipamentos' },
+  { ticker: 'MGLU3',  name: 'Magazine Luiza',       sector: 'Varejo',            subsector: 'Comércio' },
+  { ticker: 'VIIA3',  name: 'Via Varejo',           sector: 'Varejo',            subsector: 'Comércio' },
+  { ticker: 'PCAR3',  name: 'GPA',                  sector: 'Varejo',            subsector: 'Supermercados' },
+  { ticker: 'LREN3',  name: 'Lojas Renner',         sector: 'Varejo',            subsector: 'Moda' },
+  { ticker: 'ARZZ3',  name: 'Arezzo',               sector: 'Varejo',            subsector: 'Moda' },
+  { ticker: 'SOMA3',  name: 'Grupo Soma',           sector: 'Varejo',            subsector: 'Moda' },
+  { ticker: 'MULT3',  name: 'Multiplan',            sector: 'Varejo',            subsector: 'Shopping Centers' },
+  // Telecom
+  { ticker: 'VIVT3',  name: 'Telefônica Vivo',      sector: 'Telecom',           subsector: 'Telecomunicações' },
+  { ticker: 'TIMS3',  name: 'TIM',                  sector: 'Telecom',           subsector: 'Telecomunicações' },
   // Healthcare
-  { ticker: 'RDOR3', name: 'Rede D\'Or', sector: 'Saúde', subsector: 'Hospitais' },
-  { ticker: 'HAPV3', name: 'Hapvida', sector: 'Saúde', subsector: 'Planos de Saúde' },
-  { ticker: 'FLRY3', name: 'Fleury', sector: 'Saúde', subsector: 'Diagnósticos' },
-  { ticker: 'DASA3', name: 'Dasa', sector: 'Saúde', subsector: 'Diagnósticos' },
+  { ticker: 'RDOR3',  name: "Rede D'Or",            sector: 'Saúde',             subsector: 'Hospitais' },
+  { ticker: 'HAPV3',  name: 'Hapvida',              sector: 'Saúde',             subsector: 'Planos de Saúde' },
+  { ticker: 'FLRY3',  name: 'Fleury',               sector: 'Saúde',             subsector: 'Diagnósticos' },
+  { ticker: 'DASA3',  name: 'Dasa',                 sector: 'Saúde',             subsector: 'Diagnósticos' },
   // Real Estate
-  { ticker: 'CYRE3', name: 'Cyrela', sector: 'Imobiliário', subsector: 'Incorporação' },
-  { ticker: 'EZTC3', name: 'EZTEC', sector: 'Imobiliário', subsector: 'Incorporação' },
-  { ticker: 'MRVE3', name: 'MRV', sector: 'Imobiliário', subsector: 'Incorporação' },
-  { ticker: 'EVEN3', name: 'Even', sector: 'Imobiliário', subsector: 'Incorporação' },
+  { ticker: 'CYRE3',  name: 'Cyrela',               sector: 'Imobiliário',       subsector: 'Incorporação' },
+  { ticker: 'EZTC3',  name: 'EZTEC',               sector: 'Imobiliário',       subsector: 'Incorporação' },
+  { ticker: 'MRVE3',  name: 'MRV',                  sector: 'Imobiliário',       subsector: 'Incorporação' },
+  { ticker: 'EVEN3',  name: 'Even',                 sector: 'Imobiliário',       subsector: 'Incorporação' },
   // Transport & Logistics
-  { ticker: 'RAIL3', name: 'Rumo Logística', sector: 'Logística', subsector: 'Ferroviário' },
-  { ticker: 'AZUL4', name: 'Azul', sector: 'Logística', subsector: 'Aviação' },
-  { ticker: 'GOLL4', name: 'Gol', sector: 'Logística', subsector: 'Aviação' },
-  { ticker: 'CCRO3', name: 'CCR', sector: 'Logística', subsector: 'Rodovias' },
+  { ticker: 'RAIL3',  name: 'Rumo Logística',       sector: 'Logística',         subsector: 'Ferroviário' },
+  { ticker: 'RENT3',  name: 'Localiza',             sector: 'Logística',         subsector: 'Locação de Veículos' },
+  { ticker: 'AZUL4',  name: 'Azul',                 sector: 'Logística',         subsector: 'Aviação' },
+  { ticker: 'GOLL4',  name: 'Gol',                  sector: 'Logística',         subsector: 'Aviação' },
+  { ticker: 'CCRO3',  name: 'CCR',                  sector: 'Logística',         subsector: 'Rodovias' },
 ]
 
 export const FII_LIST = [
@@ -84,8 +107,14 @@ export function generateMockQuote(ticker, basePrice = null) {
     const x = Math.sin(seed * 9301 + 49297) * 233280
     return min + ((x - Math.floor(x)) * (max - min))
   }
+  const rng2 = (min, max) => {
+    const x = Math.sin(seed * 6364 + 1234) * 233280
+    return min + ((x - Math.floor(x)) * (max - min))
+  }
 
-  const price = basePrice || (rng(5, 80) + rng(0, 120))
+  // Use known price anchor when available, otherwise constrain to realistic range
+  const anchor = TICKER_BASE_PRICES[ticker]
+  const price = basePrice || (anchor ? anchor * (1 + rng2(-0.05, 0.05)) : rng(5, 60))
   const changePercent = rng(-5, 5)
   const change = price * (changePercent / 100)
   const volume = Math.floor(rng(500000, 50000000))

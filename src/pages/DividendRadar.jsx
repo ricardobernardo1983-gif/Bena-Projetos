@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 import { DollarSign, Calendar, TrendingUp, Star, Filter, Search, ChevronDown } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line } from 'recharts'
 import { Button } from '@/components/ui/button'
@@ -194,8 +194,8 @@ export default function DividendRadar() {
             </thead>
             <tbody>
               {filtered.slice(0, 20).map((stock) => (
-                <>
-                  <tr key={stock.ticker}
+                <Fragment key={stock.ticker}>
+                  <tr
                     className="hover:bg-[#0E141F] transition-colors border-b border-[#1A2230]/50 cursor-pointer"
                     onClick={() => setExpanded(expanded === stock.ticker ? null : stock.ticker)}>
                     <td className="px-4 py-3">
@@ -268,7 +268,7 @@ export default function DividendRadar() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
