@@ -52,7 +52,7 @@ export default function App() {
         }}
       />
       <Routes>
-        <Route path="/" element={<Navigate to="/onboarding" replace />} />
+        <Route path="/" element={<Onboarding />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/setup" element={<Setup />} />
         <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />

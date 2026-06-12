@@ -1100,6 +1100,16 @@ export default function Onboarding() {
   const [openFaq, setOpenFaq] = useState(null)
   const navigate = useNavigate()
 
+  useEffect(() => {
+    if (import.meta.env.VITE_SUPABASE_URL) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) navigate('/dashboard', { replace: true })
+      })
+    } else if (localStorage.getItem('nexus_demo_mode')) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [navigate])
+
   const handleDemoAccess = () => {
     localStorage.setItem('nexus_demo_mode', 'true')
     navigate('/dashboard')
